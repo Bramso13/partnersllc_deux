@@ -17,10 +17,10 @@ export function RejectionWarningBanner({
 
   const handleNavigateToRejectedStep = () => {
     if (stepId) {
-      router.push(`/workflow?dossier_id=${dossierId}&step_id=${stepId}`);
+      router.push(`/dossier/${dossierId}?step_id=${stepId}`);
     } else {
-      // Navigate to workflow - it should show the rejected step
-      router.push(`/workflow?dossier_id=${dossierId}`);
+      // Navigate to dossier detail page
+      router.push(`/dossier/${dossierId}`);
     }
   };
 

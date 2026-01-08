@@ -9,7 +9,10 @@ interface ProgressCardProps {
   productSteps?: ProductStep[];
 }
 
-export function ProgressCard({ dossier, productSteps = [] }: ProgressCardProps) {
+export function ProgressCard({
+  dossier,
+  productSteps = [],
+}: ProgressCardProps) {
   const router = useRouter();
   const progress = dossier.progress_percentage || 0;
   const statusLabel = getStatusLabel(dossier.status);
@@ -28,8 +31,8 @@ export function ProgressCard({ dossier, productSteps = [] }: ProgressCardProps) 
   }
 
   const handleStartStep = (stepId: string) => {
-    // Navigate to dashboard with step_id parameter to open workflow on that step
-    router.push(`/dashboard?dossier_id=${dossier.id}&step_id=${stepId}`);
+    // Navigate to dossier detail page with step_id parameter to open workflow on that step
+    router.push(`/dossier/${dossier.id}?step_id=${stepId}`);
   };
 
   return (
@@ -161,7 +164,11 @@ function getStatusColor(status: string) {
       dot: "bg-brand-warning",
     };
   }
-  if (status === "CLOSED" || status === "LLC_ACCEPTED" || status === "BANK_OPENED") {
+  if (
+    status === "CLOSED" ||
+    status === "LLC_ACCEPTED" ||
+    status === "BANK_OPENED"
+  ) {
     return {
       bg: "bg-brand-success/10",
       text: "text-brand-success",
@@ -190,19 +197,23 @@ function getSteps(dossier: DossierWithDetails, productSteps: ProductStep[]) {
 
   // If no product steps, return empty array
   if (!productSteps || productSteps.length === 0) {
-    console.warn("[getSteps] No product steps provided", { productStepsLength: productSteps?.length || 0 });
+    console.warn("[getSteps] No product steps provided", {
+      productStepsLength: productSteps?.length || 0,
+    });
     return [];
   }
 
   // Debug: log product steps structure
   console.log("[getSteps] Processing product steps", {
     count: productSteps.length,
-    firstStep: productSteps[0] ? {
-      id: productSteps[0].id,
-      step_id: productSteps[0].step_id,
-      hasStep: !!productSteps[0].step,
-      stepLabel: productSteps[0].step?.label || "NO LABEL",
-    } : null,
+    firstStep: productSteps[0]
+      ? {
+          id: productSteps[0].id,
+          step_id: productSteps[0].step_id,
+          hasStep: !!productSteps[0].step,
+          stepLabel: productSteps[0].step?.label || "NO LABEL",
+        }
+      : null,
   });
 
   // Return all product steps with their status
@@ -219,112 +230,111 @@ function getSteps(dossier: DossierWithDetails, productSteps: ProductStep[]) {
       return true;
     })
     .map((productStep, index) => {
-    const stepInstance = stepInstanceMap.get(productStep.step_id);
-    const validationStatus = (stepInstance as any)?.validation_status;
+      const stepInstance = stepInstanceMap.get(productStep.step_id);
+      const validationStatus = (stepInstance as any)?.validation_status;
 
-    // Check if previous steps are approved
-    const canStart = checkPreviousStepsApproved(
-      productSteps,
-      stepInstanceMap,
-      index
-    );
+      // Check if previous steps are approved
+      const canStart = checkPreviousStepsApproved(
+        productSteps,
+        stepInstanceMap,
+        index
+      );
 
-    // Determine step status
-    if (!stepInstance) {
-      // No step instance - step not started yet
-      return {
-        stepId: productStep.step_id,
-        title: productStep.step?.label || "Étape sans nom",
-        bgColor: "bg-brand-dark-surface",
-        border: "",
-        iconBg: "bg-brand-text-secondary/20",
-        icon: "fa-solid fa-circle",
-        iconColor: "text-brand-text-secondary",
-        showButton: true,
-        canStart,
-        buttonText: "Commencer",
-      };
-    }
+      // Determine step status
+      if (!stepInstance) {
+        // No step instance - step not started yet
+        return {
+          stepId: productStep.step_id,
+          title: productStep.step?.label || "Étape sans nom",
+          bgColor: "bg-brand-dark-surface",
+          border: "",
+          iconBg: "bg-brand-text-secondary/20",
+          icon: "fa-solid fa-circle",
+          iconColor: "text-brand-text-secondary",
+          showButton: true,
+          canStart,
+          buttonText: "Commencer",
+        };
+      }
 
-    const isCompleted =
-      stepInstance.completed_at !== null ||
-      validationStatus === "APPROVED";
-    const isInProgress =
-      !isCompleted &&
-      stepInstance.started_at !== null &&
-      stepInstance.id === dossier.current_step_instance_id;
-    const isRejected = validationStatus === "REJECTED";
-    const isSubmitted =
-      validationStatus === "SUBMITTED" || validationStatus === "UNDER_REVIEW";
+      const isCompleted =
+        stepInstance.completed_at !== null || validationStatus === "APPROVED";
+      const isInProgress =
+        !isCompleted &&
+        stepInstance.started_at !== null &&
+        stepInstance.id === dossier.current_step_instance_id;
+      const isRejected = validationStatus === "REJECTED";
+      const isSubmitted =
+        validationStatus === "SUBMITTED" || validationStatus === "UNDER_REVIEW";
 
-    if (isCompleted) {
-      return {
-        stepId: productStep.step_id,
-        title: productStep.step?.label || "Étape sans nom",
-        bgColor: "bg-brand-success/10",
-        border: "",
-        iconBg: "bg-brand-success/20",
-        icon: "fa-solid fa-check",
-        iconColor: "text-brand-success",
-        showButton: false,
-        canStart: false,
-        buttonText: "",
-      };
-    } else if (isRejected) {
-      return {
-        stepId: productStep.step_id,
-        title: productStep.step?.label || "Étape sans nom",
-        bgColor: "bg-brand-danger/10",
-        border: "border border-brand-danger/20",
-        iconBg: "bg-brand-danger/20",
-        icon: "fa-solid fa-xmark",
-        iconColor: "text-brand-danger",
-        showButton: true,
-        canStart: true, // Can always restart rejected steps
-        buttonText: "Corriger",
-      };
-    } else if (isSubmitted) {
-      return {
-        stepId: productStep.step_id,
-        title: productStep.step?.label || "Étape sans nom",
-        bgColor: "bg-brand-warning/10",
-        border: "border border-brand-warning/20",
-        iconBg: "bg-brand-warning/20",
-        icon: "fa-solid fa-clock",
-        iconColor: "text-brand-warning",
-        showButton: false,
-        canStart: false,
-        buttonText: "",
-      };
-    } else if (isInProgress) {
-      return {
-        stepId: productStep.step_id,
-        title: productStep.step?.label || "Étape sans nom",
-        bgColor: "bg-brand-warning/10",
-        border: "border border-brand-warning/20",
-        iconBg: "bg-brand-warning/20",
-        icon: "fa-solid fa-spinner fa-spin",
-        iconColor: "text-brand-warning",
-        showButton: true,
-        canStart: true,
-        buttonText: "Continuer",
-      };
-    } else {
-      // DRAFT status
-      return {
-        stepId: productStep.step_id,
-        title: productStep.step?.label || "Étape sans nom",
-        bgColor: "bg-brand-dark-surface",
-        border: "",
-        iconBg: "bg-brand-text-secondary/20",
-        icon: "fa-solid fa-circle",
-        iconColor: "text-brand-text-secondary",
-        showButton: true,
-        canStart,
-        buttonText: "Commencer",
-      };
-    }
-  });
+      if (isCompleted) {
+        return {
+          stepId: productStep.step_id,
+          title: productStep.step?.label || "Étape sans nom",
+          bgColor: "bg-brand-success/10",
+          border: "",
+          iconBg: "bg-brand-success/20",
+          icon: "fa-solid fa-check",
+          iconColor: "text-brand-success",
+          showButton: false,
+          canStart: false,
+          buttonText: "",
+        };
+      } else if (isRejected) {
+        return {
+          stepId: productStep.step_id,
+          title: productStep.step?.label || "Étape sans nom",
+          bgColor: "bg-brand-danger/10",
+          border: "border border-brand-danger/20",
+          iconBg: "bg-brand-danger/20",
+          icon: "fa-solid fa-xmark",
+          iconColor: "text-brand-danger",
+          showButton: true,
+          canStart: true, // Can always restart rejected steps
+          buttonText: "Corriger",
+        };
+      } else if (isSubmitted) {
+        return {
+          stepId: productStep.step_id,
+          title: productStep.step?.label || "Étape sans nom",
+          bgColor: "bg-brand-warning/10",
+          border: "border border-brand-warning/20",
+          iconBg: "bg-brand-warning/20",
+          icon: "fa-solid fa-clock",
+          iconColor: "text-brand-warning",
+          showButton: false,
+          canStart: false,
+          buttonText: "",
+        };
+      } else if (isInProgress) {
+        return {
+          stepId: productStep.step_id,
+          title: productStep.step?.label || "Étape sans nom",
+          bgColor: "bg-brand-warning/10",
+          border: "border border-brand-warning/20",
+          iconBg: "bg-brand-warning/20",
+          icon: "fa-solid fa-spinner fa-spin",
+          iconColor: "text-brand-warning",
+          showButton: true,
+          canStart: true,
+          buttonText: "Continuer",
+        };
+      } else {
+        // DRAFT status
+        return {
+          stepId: productStep.step_id,
+          title: productStep.step?.label || "Étape sans nom",
+          bgColor: "bg-brand-dark-surface",
+          border: "",
+          iconBg: "bg-brand-text-secondary/20",
+          icon: "fa-solid fa-circle",
+          iconColor: "text-brand-text-secondary",
+          showButton: true,
+          canStart,
+          buttonText: "Commencer",
+        };
+      }
+    });
 }
 
 function checkPreviousStepsApproved(
@@ -351,10 +361,7 @@ function checkPreviousStepsApproved(
     const prevCompleted = prevStepInstance.completed_at !== null;
 
     // Previous step must be APPROVED or completed
-    if (
-      !prevCompleted &&
-      prevValidationStatus !== "APPROVED"
-    ) {
+    if (!prevCompleted && prevValidationStatus !== "APPROVED") {
       return false;
     }
   }

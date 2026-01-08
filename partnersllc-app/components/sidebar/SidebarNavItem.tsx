@@ -12,8 +12,15 @@ interface SidebarNavItemProps {
 
 export function SidebarNavItem({ item, role }: SidebarNavItemProps) {
   const pathname = usePathname();
-  const isActive =
-    pathname === item.href || pathname.startsWith(item.href + "/");
+  
+  // Determine if this route should match exactly or with sub-routes
+  // Routes that are "terminal" (like /dashboard) should only match exactly
+  // Routes with children (like /dashboard/dossiers) should match with sub-routes
+  const isExactRoute = item.href === "/dashboard" || item.href === "/admin";
+  
+  const isActive = isExactRoute
+    ? pathname === item.href
+    : pathname === item.href || pathname.startsWith(item.href + "/");
 
   // Active state styling based on role
   const activeStyles =

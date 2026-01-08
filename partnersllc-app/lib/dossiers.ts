@@ -40,7 +40,12 @@ export interface StepInstance {
   step_id: string;
   started_at: string | null;
   completed_at: string | null;
-  validation_status?: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+  validation_status?:
+    | "DRAFT"
+    | "SUBMITTED"
+    | "UNDER_REVIEW"
+    | "APPROVED"
+    | "REJECTED";
   rejection_reason?: string | null;
 }
 
@@ -50,6 +55,27 @@ export interface Product {
   description: string | null;
 }
 
+export interface DocumentType {
+  id: string;
+  code: string;
+  label: string;
+  description: string | null;
+  required_step_id: string | null;
+  max_file_size_mb: number | null;
+  allowed_extensions: string[] | null;
+}
+
+export interface TimelineEvent {
+  id: string;
+  event_type: string;
+  entity_type: string;
+  entity_id: string;
+  actor_type: string | null;
+  actor_id: string | null;
+  payload: Record<string, any>;
+  created_at: string;
+}
+
 export interface DossierWithDetails extends Dossier {
   product?: Product | null;
   current_step_instance?: (StepInstance & { step?: Step | null }) | null;
@@ -57,6 +83,8 @@ export interface DossierWithDetails extends Dossier {
   completed_steps_count?: number;
   total_steps_count?: number;
   progress_percentage?: number;
+  required_documents?: DocumentType[];
+  timeline_events?: TimelineEvent[];
 }
 
 /**
@@ -177,7 +205,16 @@ export async function getDossierById(
     .eq("id", dossierId)
     .single();
 
-  if (error || !dossier) {
+  if (error) {
+    console.error("Error fetching dossier:", error);
+    // If not found, return null instead of throwing
+    if (error.code === "PGRST116") {
+      return null;
+    }
+    throw error;
+  }
+
+  if (!dossier) {
     return null;
   }
 
@@ -245,6 +282,25 @@ export async function getDossierById(
   const progressPercentage =
     totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
+  // Fetch required documents for current step if exists
+  let requiredDocuments: DocumentType[] = [];
+  if (currentStepInstance?.step?.id) {
+    const { data: documentTypes } = await supabase
+      .from("document_types")
+      .select("*")
+      .eq("required_step_id", currentStepInstance.step.id);
+
+    requiredDocuments = (documentTypes || []) as DocumentType[];
+  }
+
+  // Fetch timeline events for this dossier
+  const { data: events } = await supabase
+    .from("events")
+    .select("*")
+    .eq("entity_type", "dossier")
+    .eq("entity_id", dossier.id)
+    .order("created_at", { ascending: true });
+
   return {
     ...dossier,
     product,
@@ -253,5 +309,7 @@ export async function getDossierById(
     completed_steps_count: completedSteps,
     total_steps_count: totalSteps,
     progress_percentage: progressPercentage,
+    required_documents: requiredDocuments,
+    timeline_events: (events || []) as TimelineEvent[],
   } as DossierWithDetails;
 }

@@ -18,8 +18,14 @@ interface EmptyStateProps {
   rejectedStepId?: string;
   currentStepInstance?: {
     id: string;
-    validation_status?: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+    validation_status?:
+      | "DRAFT"
+      | "SUBMITTED"
+      | "UNDER_REVIEW"
+      | "APPROVED"
+      | "REJECTED";
   } | null;
+  initialStepId?: string;
 }
 
 export function EmptyState({
@@ -30,6 +36,7 @@ export function EmptyState({
   rejectedFieldsCount,
   rejectedStepId,
   currentStepInstance,
+  initialStepId,
 }: EmptyStateProps) {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>(initialProducts || []);
@@ -44,8 +51,9 @@ export function EmptyState({
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get step_id from URL if present
-  const stepIdFromUrl = searchParams.get("step_id");
+  // Get step_id from URL if present, or use initialStepId prop
+  const stepIdFromUrl =
+    searchParams.get("step_id") || initialStepId || undefined;
 
   // If we have a dossier and product, show workflow
   if (selectedDossierId && selectedProductId && selectedProductName) {
@@ -72,7 +80,8 @@ export function EmptyState({
         </div>
 
         {/* Status Message */}
-        {validationStatus === "SUBMITTED" || validationStatus === "UNDER_REVIEW" ? (
+        {validationStatus === "SUBMITTED" ||
+        validationStatus === "UNDER_REVIEW" ? (
           <div className="bg-brand-warning/10 border border-brand-warning rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2">
               <span>⏳</span>
@@ -87,7 +96,9 @@ export function EmptyState({
           <div className="bg-brand-success/10 border border-brand-success rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2">
               <span>✓</span>
-              <span className="text-sm">Étape validée. Vous pouvez continuer.</span>
+              <span className="text-sm">
+                Étape validée. Vous pouvez continuer.
+              </span>
             </div>
           </div>
         ) : null}
@@ -96,7 +107,7 @@ export function EmptyState({
           dossierId={selectedDossierId}
           productId={selectedProductId}
           productName={selectedProductName}
-          initialStepId={stepIdFromUrl || undefined}
+          initialStepId={stepIdFromUrl}
         />
       </div>
     );

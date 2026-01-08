@@ -52,6 +52,7 @@ export function WorkflowStepper({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   const currentStep = productSteps[currentStepIndex];
   const totalSteps = productSteps.length;
@@ -171,6 +172,10 @@ export function WorkflowStepper({
       setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[fieldKey];
+        // Hide validation errors section if no errors remain
+        if (Object.keys(newErrors).length === 0) {
+          setShowValidationErrors(false);
+        }
         return newErrors;
       });
     }
@@ -206,6 +211,7 @@ export function WorkflowStepper({
       const validationErrors = validateForm(rejectedFieldValues, rejectedFields);
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
+        setShowValidationErrors(true);
         const firstErrorField = Object.keys(validationErrors)[0];
         const element = document.getElementById(
           `field-${rejectedFields.find((f) => f.field_key === firstErrorField)?.id}`
@@ -216,6 +222,7 @@ export function WorkflowStepper({
 
       // Resubmit only corrected rejected fields
       setIsSubmitting(true);
+      setShowValidationErrors(false);
       try {
         if (!currentStepInstance?.id) {
           throw new Error("Instance d'étape introuvable");
@@ -249,6 +256,7 @@ export function WorkflowStepper({
       const validationErrors = validateForm(formData, currentStepFields);
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
+        setShowValidationErrors(true);
         const firstErrorField = Object.keys(validationErrors)[0];
         const element = document.getElementById(
           `field-${currentStepFields.find((f) => f.field_key === firstErrorField)?.id}`
@@ -258,6 +266,7 @@ export function WorkflowStepper({
       }
 
       setIsSubmitting(true);
+      setShowValidationErrors(false);
       try {
         await onStepComplete(currentStep.step_id, formData);
         
@@ -468,6 +477,49 @@ export function WorkflowStepper({
             </div>
           )}
 
+          {/* Validation Errors Section */}
+          {showValidationErrors && Object.keys(errors).length > 0 && (
+            <div className="bg-brand-danger/10 border border-brand-danger rounded-lg p-5 mb-6">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <i className="fa-solid fa-triangle-exclamation text-brand-danger text-lg"></i>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-brand-danger font-semibold text-base mb-3">
+                    Erreurs de validation détectées
+                  </h3>
+                  <p className="text-sm text-brand-text-secondary mb-4">
+                    Veuillez corriger les erreurs suivantes avant de soumettre :
+                  </p>
+                  <ul className="space-y-2">
+                    {Object.entries(errors).map(([fieldKey, errorMessage]) => {
+                      const field = currentStepFields.find((f) => f.field_key === fieldKey);
+                      return (
+                        <li key={fieldKey} className="flex items-start gap-2 text-sm">
+                          <span className="text-brand-danger mt-1">•</span>
+                          <span className="text-brand-text-primary">
+                            <span className="font-medium">
+                              {field?.label || fieldKey} :{" "}
+                            </span>
+                            <span className="text-brand-text-secondary">{errorMessage}</span>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowValidationErrors(false)}
+                  className="flex-shrink-0 text-brand-text-secondary hover:text-brand-text-primary transition-colors"
+                  aria-label="Fermer les erreurs"
+                >
+                  <i className="fa-solid fa-times"></i>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Submit Button */}
           <div className="pt-6 border-t border-brand-dark-border flex items-center justify-between">
             {currentStepIndex > 0 && (
@@ -482,7 +534,7 @@ export function WorkflowStepper({
             )}
             <button
               type="submit"
-              disabled={!formIsValid || isSubmitting || currentStepFields.length === 0}
+              disabled={isSubmitting || currentStepFields.length === 0}
               className="ml-auto px-8 py-3.5 rounded-xl font-semibold text-base
                 bg-brand-accent text-brand-dark-bg
                 transition-all duration-300

@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth";
 import { getProfile } from "@/lib/profile";
 import { getUserDossiers } from "@/lib/dossiers";
-import { getProductSteps } from "@/lib/workflow";
+import { getProductSteps, ProductStep } from "@/lib/workflow";
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { ProgressCard } from "@/components/dashboard/ProgressCard";
@@ -108,52 +108,7 @@ async function DashboardContent({ user }: { user: { id: string } }) {
   try {
     const dossiers = await getUserDossiers();
 
-    // Check if user has a dossier in QUALIFICATION status (workflow in progress)
-    const qualificationDossier = dossiers.find(
-      (d) => d.status === "QUALIFICATION"
-    );
-
-    if (qualificationDossier && qualificationDossier.product_id) {
-      // Check for rejected steps and count rejected fields
-      const rejectedSteps = qualificationDossier.step_instances?.filter(
-        (si) => (si as any).validation_status === "REJECTED"
-      ) || [];
-
-      // Fetch rejected fields count for each rejected step
-      let rejectedFieldsCount = 0;
-      let rejectedStepId: string | undefined;
-      
-      const { createClient } = await import("@/lib/supabase/server");
-      const supabase = await createClient();
-      
-      for (const rejectedStep of rejectedSteps) {
-        const { data: rejectedFields } = await supabase
-          .from("step_field_values")
-          .select("id")
-          .eq("step_instance_id", rejectedStep.id)
-          .eq("validation_status", "REJECTED");
-
-        if (rejectedFields && rejectedFields.length > 0) {
-          rejectedFieldsCount += rejectedFields.length;
-          if (!rejectedStepId) {
-            rejectedStepId = rejectedStep.step_id;
-          }
-        }
-      }
-
-      // Show workflow for dossier in qualification
-      return (
-        <EmptyState
-          dossierId={qualificationDossier.id}
-          productId={qualificationDossier.product_id}
-          productName={qualificationDossier.product?.name || undefined}
-          rejectedFieldsCount={rejectedFieldsCount > 0 ? rejectedFieldsCount : undefined}
-          rejectedStepId={rejectedStepId}
-          currentStepInstance={qualificationDossier.current_step_instance}
-        />
-      );
-    }
-
+    // If no dossier, show EmptyState to create one
     if (dossiers.length === 0) {
       return <EmptyState />;
     }
@@ -162,16 +117,21 @@ async function DashboardContent({ user }: { user: { id: string } }) {
     const mainDossier = dossiers[0];
 
     // Fetch product steps for this dossier if product_id exists
-    let productSteps = [];
+    let productSteps: ProductStep[] = [];
     if (mainDossier.product_id) {
       try {
         productSteps = await getProductSteps(mainDossier.product_id);
-        console.log(`[Dashboard] Loaded ${productSteps.length} product steps for product ${mainDossier.product_id}`);
+        console.log(
+          `[Dashboard] Loaded ${productSteps.length} product steps for product ${mainDossier.product_id}`
+        );
       } catch (error) {
         console.error("Error fetching product steps:", error);
       }
     } else {
-      console.warn("[Dashboard] No product_id found for dossier", mainDossier.id);
+      console.warn(
+        "[Dashboard] No product_id found for dossier",
+        mainDossier.id
+      );
     }
 
     // Calculate estimated completion (mock for now - should come from business logic)
@@ -181,6 +141,17 @@ async function DashboardContent({ user }: { user: { id: string } }) {
 
     return (
       <>
+        {/* Link to dossier detail page */}
+        <div className="mb-6 flex justify-end">
+          <a
+            href={`/dashboard/dossier/${mainDossier.id}`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-accent text-brand-dark-bg rounded-lg hover:opacity-90 transition-opacity font-medium"
+          >
+            <span>Voir le détail du dossier</span>
+            <i className="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
         {/* Progress Overview Section */}
         <div id="progress-overview" className="grid grid-cols-12 gap-6 mb-8">
           <ProgressCard dossier={mainDossier} productSteps={productSteps} />
@@ -192,7 +163,7 @@ async function DashboardContent({ user }: { user: { id: string } }) {
         {/* Main Grid Section */}
         <div id="main-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <TimelineSection dossier={mainDossier} />
-          <DocumentsSection />
+          {/* <DocumentsSection /> */}
         </div>
       </>
     );

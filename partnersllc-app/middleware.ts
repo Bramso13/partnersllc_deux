@@ -34,8 +34,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /dashboard routes
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+  // Protect /dashboard and /admin routes
+  if (
+    request.nextUrl.pathname.startsWith("/dashboard") ||
+    request.nextUrl.pathname.startsWith("/admin")
+  ) {
     if (!user) {
       // Redirect to login if not authenticated
       const url = request.nextUrl.clone();
@@ -44,15 +47,17 @@ export async function middleware(request: NextRequest) {
     }
 
     // Fetch user profile status for dashboard routes
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("status")
-      .eq("id", user.id)
-      .single();
+    if (request.nextUrl.pathname.startsWith("/dashboard")) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("status")
+        .eq("id", user.id)
+        .single();
 
-    if (profile) {
-      // Store status in request header for use in page components
-      supabaseResponse.headers.set("x-user-status", profile.status);
+      if (profile) {
+        // Store status in request header for use in page components
+        supabaseResponse.headers.set("x-user-status", profile.status);
+      }
     }
   }
 

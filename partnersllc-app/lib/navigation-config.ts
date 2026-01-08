@@ -24,9 +24,9 @@ export const clientNavConfig: NavConfig = {
           label: "Tableau de bord",
         },
         {
-          href: "/dashboard/dossier",
+          href: "/dashboard/dossiers",
           icon: "fa-list-check",
-          label: "Mon dossier LLC",
+          label: "Mes dossiers",
         },
         {
           href: "/dashboard/documents",
