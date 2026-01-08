@@ -1,0 +1,9 @@
+partnersllc-app/.env
+partnersllc-app/.env.local
+partnersllc-app/.env.development.local
+partnersllc-app/.env.test.local
+partnersllc-app/.env.production.local
+
+partnersllc-app/.pnpm-store
+partnersllc-app/.next
+partnersllc-app/node_modules
