@@ -1,0 +1,601 @@
+<!DOCTYPE html><html lang="fr"><head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark-bg': '#191A1D',
+                        'brand-dark-surface': '#2D3033',
+                        'brand-dark-border': '#363636',
+                        'brand-text-primary': '#F9F9F9',
+                        'brand-text-secondary': '#B7B7B7',
+                        'brand-accent': '#00F0FF',
+                        'brand-success': '#4ADE80',
+                        'brand-warning': '#FACC15',
+                        'brand-danger': '#F95757'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-accent': '0 0 15px rgba(0, 240, 255, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <script>window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #191A1D;
+            color: #F9F9F9;
+        }
+        .notification-card {
+            transition: all 0.2s ease;
+        }
+        .notification-card:hover {
+            transform: translateX(4px);
+        }
+        .notification-unread {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.05) 0%, transparent 100%);
+            border-left: 3px solid #00F0FF;
+        }
+        .filter-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .filter-tab:hover {
+            background-color: #363636;
+        }
+        .filter-tab.active {
+            background-color: #F9F9F9;
+            color: #191A1D;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark-bg">
+    
+    <div id="main-container" class="flex min-h-[1024px] overflow-hidden">
+        
+        <aside id="sidebar-admin" class="w-72 bg-brand-dark-bg text-brand-text-secondary flex flex-col p-4">
+            <div id="sidebar-header" class="p-4 mb-8">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved text-brand-accent text-lg"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-brand-text-primary tracking-wide">PARTNERS</h1>
+                </div>
+                <p class="text-xs text-gray-500 mt-1 ml-14">Back-Office</p>
+            </div>
+            
+            <nav id="sidebar-nav-admin" class="flex-1 space-y-2">
+                <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-chart-pie w-6"></i>
+                    <span>Vue d'ensemble</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-users-gear w-6"></i>
+                    <span>Gestion Clients</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-folder-tree w-6"></i>
+                    <span>Dossiers LLC</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar w-6"></i>
+                    <span>Facturation</span>
+                </a>
+                
+                <div class="pt-6">
+                    <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Outils</p>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-text-primary text-brand-dark-bg font-bold">
+                        <i class="fa-solid fa-bullhorn w-6"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-chart-line w-6"></i>
+                        <span>Rapports</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-gear w-6"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div id="sidebar-footer-admin" class="p-2">
+                <div class="bg-brand-dark-surface rounded-xl p-4 text-center">
+                    <p class="text-sm text-brand-text-secondary">© 2025 PARTNERS LLC</p>
+                    <p class="text-xs text-gray-500 mt-1">Tous droits réservés</p>
+                </div>
+            </div>
+        </aside>
+        
+        <main id="main-content" class="flex-1 flex flex-col overflow-hidden bg-brand-dark-surface rounded-l-3xl">
+            
+            <header id="header-admin" class="px-8 py-5 flex items-center justify-between border-b border-brand-dark-border">
+                <div class="flex-1 max-w-lg">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-secondary"></i>
+                        <input type="text" placeholder="Rechercher une notification..." class="w-full bg-brand-dark-bg border border-brand-dark-border rounded-lg pl-10 pr-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <button class="relative text-brand-text-secondary hover:text-brand-text-primary transition-colors">
+                        <i class="fa-solid fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-danger rounded-full border-2 border-brand-dark-surface"></span>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Admin Profile" class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-primary">Sarah Connor</p>
+                            <p class="text-xs text-brand-text-secondary">Administratrice</p>
+                        </div>
+                        <button class="text-brand-text-secondary hover:text-brand-text-primary">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <div id="notifications-dashboard-content" class="flex-1 overflow-y-auto px-8 py-8">
+                
+                <div id="page-header-notifications" class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-text-primary">Notifications</h2>
+                        <p class="text-brand-text-secondary mt-1">Centre de notifications et alertes système</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="px-4 py-2.5 bg-brand-dark-bg text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center gap-2 border border-brand-dark-border">
+                            <i class="fa-solid fa-check-double"></i>
+                            <span>Tout marquer comme lu</span>
+                        </button>
+                        <button class="px-4 py-2.5 bg-brand-dark-bg text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center gap-2 border border-brand-dark-border">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Paramètres</span>
+                        </button>
+                        <button class="px-4 py-2.5 bg-brand-accent text-brand-dark-bg rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Nouvelle Notification</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="notifications-stats-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-bell text-brand-accent text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-accent bg-brand-accent bg-opacity-10 px-2 py-1 rounded-full">Total</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">Total Notifications</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">1,847</p>
+                        <p class="text-xs text-brand-text-secondary mt-2">Toutes périodes</p>
+                    </div>
+                    
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-envelope text-brand-warning text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-warning bg-brand-warning bg-opacity-10 px-2 py-1 rounded-full">Non lues</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">Non Lues</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">127</p>
+                        <p class="text-xs text-brand-text-secondary mt-2">À traiter</p>
+                    </div>
+                    
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-triangle-exclamation text-brand-danger text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-danger bg-brand-danger bg-opacity-10 px-2 py-1 rounded-full">Urgent</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">Urgentes</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">23</p>
+                        <p class="text-xs text-brand-text-secondary mt-2">Action requise</p>
+                    </div>
+                    
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-clock text-brand-success text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-success bg-brand-success bg-opacity-10 px-2 py-1 rounded-full">Aujourd'hui</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">Aujourd'hui</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">47</p>
+                        <p class="text-xs text-brand-text-secondary mt-2">Dernières 24h</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+                    <div class="xl:col-span-2 bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-brand-text-primary">Activité des Notifications</h3>
+                            <select class="bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2 text-sm text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                <option>7 derniers jours</option>
+                                <option>30 derniers jours</option>
+                                <option>Ce mois</option>
+                            </select>
+                        </div>
+                        <div id="notifications-chart" style="height: 300px"></div>
+                    </div>
+
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <h3 class="text-lg font-bold text-brand-text-primary mb-6">Types de Notifications</h3>
+                        <div id="notification-types-chart" style="height: 300px"></div>
+                    </div>
+                </div>
+
+                <div id="notifications-filters-section" class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-brand-text-primary">Filtres</h3>
+                        <button class="text-sm font-semibold text-brand-accent hover:underline">Réinitialiser</button>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="filter-tab active bg-brand-text-primary text-brand-dark-bg">Toutes</span>
+                        <span class="filter-tab bg-brand-dark-surface text-brand-text-secondary">Non lues</span>
+                        <span class="filter-tab bg-brand-dark-surface text-brand-text-secondary">Urgentes</span>
+                        <span class="filter-tab bg-brand-dark-surface text-brand-text-secondary">Système</span>
+                        <span class="filter-tab bg-brand-dark-surface text-brand-text-secondary">Clients</span>
+                        <span class="filter-tab bg-brand-dark-surface text-brand-text-secondary">Paiements</span>
+                        <span class="filter-tab bg-brand-dark-surface text-brand-text-secondary">Documents</span>
+                    </div>
+                </div>
+
+                <div id="notifications-list-section" class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-brand-text-primary">Notifications Récentes</h3>
+                        <div class="flex items-center gap-3">
+                            <select class="bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2 text-sm text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                <option>Trier par: Plus récent</option>
+                                <option>Trier par: Plus ancien</option>
+                                <option>Trier par: Non lues</option>
+                                <option>Trier par: Priorité</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="notification-card notification-unread bg-brand-dark-surface rounded-xl p-6 border-r border-t border-b border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-danger bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation text-brand-danger text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">Paiement en retard</h4>
+                                            <span class="px-2 py-1 bg-brand-danger bg-opacity-10 text-brand-danger rounded-full text-xs font-semibold">Urgent</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 5 min</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">La facture #INV-2025-1243 de Lucas Moreau est en retard de 5 jours. Montant: $2,999.00</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-danger text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">
+                                            Relancer le client
+                                        </button>
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            Voir la facture
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-card notification-unread bg-brand-dark-surface rounded-xl p-6 border-r border-t border-b border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-success bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-check-circle text-brand-success text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">Nouveau paiement reçu</h4>
+                                            <span class="px-2 py-1 bg-brand-success bg-opacity-10 text-brand-success rounded-full text-xs font-semibold">Paiement</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 12 min</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">Marc Leblanc a effectué un paiement de $2,499.00 pour la facture #INV-2025-1247 via Stripe</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-success text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">
+                                            Voir le paiement
+                                        </button>
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            Envoyer reçu
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-card notification-unread bg-brand-dark-surface rounded-xl p-6 border-r border-t border-b border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-accent bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-file-circle-plus text-brand-accent text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">Nouveau document téléchargé</h4>
+                                            <span class="px-2 py-1 bg-brand-accent bg-opacity-10 text-brand-accent rounded-full text-xs font-semibold">Document</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 28 min</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">Chloé Dubois a téléchargé "Operating Agreement - CréaHub Digital LLC.pdf" dans son dossier</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-accent text-brand-dark-bg rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">
+                                            Consulter le document
+                                        </button>
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            Voir le dossier
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-card bg-brand-dark-surface rounded-xl p-6 border border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-warning bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-clock text-brand-warning text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">Rappel: Échéance fiscale</h4>
+                                            <span class="px-2 py-1 bg-brand-warning bg-opacity-10 text-brand-warning rounded-full text-xs font-semibold">Rappel</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 1h</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">La déclaration fiscale annuelle pour TechVision Global LLC doit être soumise dans 7 jours</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-warning text-brand-dark-bg rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">
+                                            Programmer rappel
+                                        </button>
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            Voir détails
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-card bg-brand-dark-surface rounded-xl p-6 border border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-accent bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-user-plus text-brand-accent text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">Nouveau client inscrit</h4>
+                                            <span class="px-2 py-1 bg-brand-accent bg-opacity-10 text-brand-accent rounded-full text-xs font-semibold">Client</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 2h</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">Sophie Martin vient de s'inscrire et a commencé le processus de création LLC pour Élégance Consulting</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-accent text-brand-dark-bg rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">
+                                            Voir le profil
+                                        </button>
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            Envoyer message
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-card bg-brand-dark-surface rounded-xl p-6 border border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-text-secondary bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-gear text-brand-text-secondary text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">Mise à jour système</h4>
+                                            <span class="px-2 py-1 bg-brand-text-secondary bg-opacity-10 text-brand-text-secondary rounded-full text-xs font-semibold">Système</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 3h</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">Une maintenance système est prévue le 20 décembre de 2h à 4h du matin. Les services seront temporairement indisponibles</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            En savoir plus
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-card bg-brand-dark-surface rounded-xl p-6 border border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-success bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-certificate text-brand-success text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">LLC créée avec succès</h4>
+                                            <span class="px-2 py-1 bg-brand-success bg-opacity-10 text-brand-success rounded-full text-xs font-semibold">Succès</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 5h</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">La LLC "Quantum Leap LLC" a été officiellement enregistrée dans le Delaware. Tous les documents sont disponibles</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-success text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">
+                                            Télécharger documents
+                                        </button>
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            Notifier le client
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-card bg-brand-dark-surface rounded-xl p-6 border border-brand-dark-border hover:border-brand-accent transition-all group cursor-pointer">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-brand-accent bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-comments text-brand-accent text-lg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-base font-bold text-brand-text-primary">Nouveau message support</h4>
+                                            <span class="px-2 py-1 bg-brand-accent bg-opacity-10 text-brand-accent rounded-full text-xs font-semibold">Support</span>
+                                        </div>
+                                        <span class="text-xs text-brand-text-secondary">Il y a 6h</span>
+                                    </div>
+                                    <p class="text-sm text-brand-text-secondary mb-3">Thomas Bernard a ouvert un ticket support concernant son EIN. Priorité: Moyenne</p>
+                                    <div class="flex items-center gap-4">
+                                        <button class="px-3 py-1.5 bg-brand-accent text-brand-dark-bg rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">
+                                            Répondre
+                                        </button>
+                                        <button class="px-3 py-1.5 bg-brand-dark-bg text-brand-text-primary rounded-lg text-xs font-semibold hover:bg-brand-dark-border transition-all">
+                                            Voir le ticket
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="text-brand-text-secondary hover:text-brand-text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mt-6 pt-6 border-t border-brand-dark-border">
+                        <p class="text-sm text-brand-text-secondary">Affichage de 1 à 8 sur 1,847 notifications</p>
+                        <div class="flex items-center gap-2">
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-text-primary text-brand-dark-bg rounded-lg font-semibold">1</button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">2</button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">3</button>
+                            <span class="text-brand-text-secondary px-2">...</span>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">231</button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.plot.ly/plotly-3.1.1.min.js"></script>
+    <script>
+        window.addEventListener('load', function() {
+            try {
+                const notificationsData = [{
+                    type: 'scatter',
+                    mode: 'lines',
+                    fill: 'tozeroy',
+                    x: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                    y: [45, 52, 38, 67, 73, 41, 47],
+                    line: { color: '#00F0FF', width: 3 },
+                    fillcolor: 'rgba(0, 240, 255, 0.1)'
+                }];
+
+                const notificationsLayout = {
+                    title: { text: '', font: { size: 0 } },
+                    xaxis: { 
+                        title: '',
+                        gridcolor: '#363636',
+                        color: '#B7B7B7'
+                    },
+                    yaxis: { 
+                        title: 'Notifications',
+                        gridcolor: '#363636',
+                        color: '#B7B7B7'
+                    },
+                    margin: { t: 20, r: 20, b: 40, l: 60 },
+                    plot_bgcolor: '#191A1D',
+                    paper_bgcolor: '#191A1D',
+                    showlegend: false
+                };
+
+                const notificationsConfig = { responsive: true, displayModeBar: false, displaylogo: false };
+                Plotly.newPlot('notifications-chart', notificationsData, notificationsLayout, notificationsConfig);
+
+                const typesData = [{
+                    type: 'pie',
+                    labels: ['Paiements', 'Clients', 'Documents', 'Système', 'Support'],
+                    values: [487, 356, 298, 412, 294],
+                    marker: { 
+                        colors: ['#4ADE80', '#00F0FF', '#FACC15', '#B7B7B7', '#F95757']
+                    },
+                    textinfo: 'label+percent',
+                    textfont: { color: '#F9F9F9' },
+                    hovertemplate: '<b>%{label}</b><br>%{value} notifications<br>%{percent}<extra></extra>'
+                }];
+
+                const typesLayout = {
+                    title: { text: '', font: { size: 0 } },
+                    margin: { t: 20, r: 20, b: 20, l: 20 },
+                    plot_bgcolor: '#191A1D',
+                    paper_bgcolor: '#191A1D',
+                    showlegend: true,
+                    legend: {
+                        font: { color: '#F9F9F9' },
+                        bgcolor: 'transparent'
+                    }
+                };
+
+                const typesConfig = { responsive: true, displayModeBar: false, displaylogo: false };
+                Plotly.newPlot('notification-types-chart', typesData, typesLayout, typesConfig);
+
+            } catch(e) {
+                console.error('Chart rendering error:', e);
+                document.getElementById('notifications-chart').innerHTML = '<div class="flex items-center justify-center h-full text-brand-text-secondary">Erreur de chargement du graphique</div>';
+                document.getElementById('notification-types-chart').innerHTML = '<div class="flex items-center justify-center h-full text-brand-text-secondary">Erreur de chargement du graphique</div>';
+            }
+        });
+    </script>
+
+
+</body></html>

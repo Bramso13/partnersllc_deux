@@ -1,0 +1,617 @@
+<!DOCTYPE html><html lang="fr"><head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Clients</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark-bg': '#191A1D',
+                        'brand-dark-surface': '#2D3033',
+                        'brand-dark-border': '#363636',
+                        'brand-text-primary': '#F9F9F9',
+                        'brand-text-secondary': '#B7B7B7',
+                        'brand-accent': '#00F0FF',
+                        'brand-success': '#4ADE80',
+                        'brand-warning': '#FACC15',
+                        'brand-danger': '#F95757'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-accent': '0 0 15px rgba(0, 240, 255, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <script>window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #191A1D;
+            color: #F9F9F9;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-completed {
+            background-color: rgba(74, 222, 128, 0.1);
+            color: #4ADE80;
+        }
+        .status-progress {
+            background-color: rgba(250, 204, 21, 0.1);
+            color: #FACC15;
+        }
+        .status-pending {
+            background-color: rgba(249, 87, 87, 0.1);
+            color: #F95757;
+        }
+        .status-active {
+            background-color: rgba(0, 240, 255, 0.1);
+            color: #00F0FF;
+        }
+        .filter-chip {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .filter-chip:hover {
+            background-color: #363636;
+        }
+        .filter-chip.active {
+            background-color: #F9F9F9;
+            color: #191A1D;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark-bg">
+    
+    <div id="main-container" class="flex min-h-[1024px] overflow-hidden">
+        
+        <aside id="sidebar-admin" class="w-72 bg-brand-dark-bg text-brand-text-secondary flex flex-col p-4">
+            <div id="sidebar-header" class="p-4 mb-8">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved text-brand-accent text-lg"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-brand-text-primary tracking-wide">PARTNERS</h1>
+                </div>
+                <p class="text-xs text-gray-500 mt-1 ml-14">Back-Office</p>
+            </div>
+            
+            <nav id="sidebar-nav-admin" class="flex-1 space-y-2">
+                <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-chart-pie w-6"></i>
+                    <span>Vue d'ensemble</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-text-primary text-brand-dark-bg font-bold">
+                    <i class="fa-solid fa-users-gear w-6"></i>
+                    <span>Gestion Clients</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-folder-tree w-6"></i>
+                    <span>Dossiers LLC</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar w-6"></i>
+                    <span>Facturation</span>
+                </a>
+                
+                <div class="pt-6">
+                    <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Outils</p>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-bullhorn w-6"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-chart-line w-6"></i>
+                        <span>Rapports</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-gear w-6"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div id="sidebar-footer-admin" class="p-2">
+                <div class="bg-brand-dark-surface rounded-xl p-4 text-center">
+                    <p class="text-sm text-brand-text-secondary">© 2025 PARTNERS LLC</p>
+                    <p class="text-xs text-gray-500 mt-1">Tous droits réservés</p>
+                </div>
+            </div>
+        </aside>
+        
+        <main id="main-content" class="flex-1 flex flex-col overflow-hidden bg-brand-dark-surface rounded-l-3xl">
+            
+            <header id="header-admin" class="px-8 py-5 flex items-center justify-between border-b border-brand-dark-border">
+                <div class="flex-1 max-w-lg">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-secondary"></i>
+                        <input type="text" placeholder="Rechercher un client, un dossier..." class="w-full bg-brand-dark-bg border border-brand-dark-border rounded-lg pl-10 pr-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <button class="relative text-brand-text-secondary hover:text-brand-text-primary transition-colors">
+                        <i class="fa-solid fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-danger rounded-full border-2 border-brand-dark-surface"></span>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Admin Profile" class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-primary">Sarah Connor</p>
+                            <p class="text-xs text-brand-text-secondary">Administratrice</p>
+                        </div>
+                        <button class="text-brand-text-secondary hover:text-brand-text-primary">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <div id="clients-dashboard-content" class="flex-1 overflow-y-auto px-8 py-8">
+                
+                <div id="page-header-clients" class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-text-primary">Gestion Clients</h2>
+                        <p class="text-brand-text-secondary mt-1">Gérer et suivre tous vos clients PARTNERS LLC</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="px-4 py-2.5 bg-brand-dark-bg text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center gap-2 border border-brand-dark-border">
+                            <i class="fa-solid fa-file-export"></i>
+                            <span>Exporter</span>
+                        </button>
+                        <button class="px-4 py-2.5 bg-brand-accent text-brand-dark-bg rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Nouveau Client</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="clients-stats-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-users text-brand-accent text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-success bg-brand-success bg-opacity-10 px-2 py-1 rounded-full">+12%</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">Total Clients</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">1,247</p>
+                    </div>
+                    
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-user-check text-brand-success text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-success bg-brand-success bg-opacity-10 px-2 py-1 rounded-full">Actifs</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">Clients Actifs</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">1,089</p>
+                    </div>
+                    
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-clock text-brand-warning text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-warning bg-brand-warning bg-opacity-10 px-2 py-1 rounded-full">En attente</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">En Onboarding</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">128</p>
+                    </div>
+                    
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-star text-brand-accent text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-brand-accent bg-brand-accent bg-opacity-10 px-2 py-1 rounded-full">VIP</span>
+                        </div>
+                        <p class="text-sm font-medium text-brand-text-secondary mb-1">Clients Premium</p>
+                        <p class="text-3xl font-bold text-brand-text-primary">89</p>
+                    </div>
+                </div>
+
+                <div id="clients-filters-section" class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-brand-text-primary">Filtres</h3>
+                        <button class="text-sm font-semibold text-brand-accent hover:underline">Réinitialiser</button>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="filter-chip active bg-brand-text-primary text-brand-dark-bg">Tous</span>
+                        <span class="filter-chip bg-brand-dark-surface text-brand-text-secondary">Actifs</span>
+                        <span class="filter-chip bg-brand-dark-surface text-brand-text-secondary">En Onboarding</span>
+                        <span class="filter-chip bg-brand-dark-surface text-brand-text-secondary">Premium</span>
+                        <span class="filter-chip bg-brand-dark-surface text-brand-text-secondary">Inactifs</span>
+                        <span class="filter-chip bg-brand-dark-surface text-brand-text-secondary">
+                            <i class="fa-solid fa-calendar mr-2"></i>
+                            Cette semaine
+                        </span>
+                        <span class="filter-chip bg-brand-dark-surface text-brand-text-secondary">
+                            <i class="fa-solid fa-location-dot mr-2"></i>
+                            Localisation
+                        </span>
+                    </div>
+                </div>
+
+                <div id="clients-table-section" class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-brand-text-primary">Liste des Clients</h3>
+                        <div class="flex items-center gap-3">
+                            <select class="bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2 text-sm text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                <option>Trier par: Plus récent</option>
+                                <option>Trier par: Nom A-Z</option>
+                                <option>Trier par: Statut</option>
+                                <option>Trier par: Date création</option>
+                            </select>
+                            <div class="flex items-center bg-brand-dark-surface border border-brand-dark-border rounded-lg overflow-hidden">
+                                <button class="px-3 py-2 bg-brand-dark-bg text-brand-text-primary">
+                                    <i class="fa-solid fa-table-cells"></i>
+                                </button>
+                                <button class="px-3 py-2 text-brand-text-secondary hover:text-brand-text-primary">
+                                    <i class="fa-solid fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-brand-dark-border">
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </th>
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase">Client</th>
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase">Email</th>
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase">Entreprise</th>
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase">Date Inscription</th>
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase text-center">Statut</th>
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase text-center">Plan</th>
+                                    <th class="p-4 text-xs font-semibold text-brand-text-secondary uppercase text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Marc Leblanc</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0894</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">marc.leblanc@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Innovatech Solutions LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">15 Déc 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-completed">Actif</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-accent bg-opacity-10 text-brand-accent rounded-full text-xs font-semibold">Premium</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Chloé Dubois</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0891</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">chloe.dubois@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">CréaHub Digital LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">12 Déc 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-progress">Onboarding</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-text-secondary bg-opacity-10 text-brand-text-secondary rounded-full text-xs font-semibold">Standard</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Lucas Moreau</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0888</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">lucas.moreau@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Quantum Leap LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">10 Déc 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-completed">Actif</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-accent bg-opacity-10 text-brand-accent rounded-full text-xs font-semibold">Premium</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Sophie Martin</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0885</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">sophie.martin@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Élégance Consulting LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">08 Déc 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-completed">Actif</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-text-secondary bg-opacity-10 text-brand-text-secondary rounded-full text-xs font-semibold">Standard</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-9.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Thomas Bernard</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0882</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">thomas.bernard@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">TechVision Global LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">05 Déc 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-pending">Documents requis</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-accent bg-opacity-10 text-brand-accent rounded-full text-xs font-semibold">Premium</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-7.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Emma Laurent</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0879</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">emma.laurent@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Horizon Ventures LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">03 Déc 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-completed">Actif</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-text-secondary bg-opacity-10 text-brand-text-secondary rounded-full text-xs font-semibold">Standard</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Alexandre Petit</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0876</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">alexandre.petit@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Phoenix Capital LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">01 Déc 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-progress">Onboarding</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-accent bg-opacity-10 text-brand-accent rounded-full text-xs font-semibold">Premium</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-brand-dark-surface transition-colors group">
+                                    <td class="p-4">
+                                        <input type="checkbox" class="w-4 h-4 rounded border-brand-dark-border">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <p class="font-semibold text-brand-text-primary">Nicolas Rousseau</p>
+                                                <p class="text-xs text-brand-text-secondary">ID: #CL-0873</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">nicolas.rousseau@email.fr</td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Digital Edge LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">28 Nov 2025</td>
+                                    <td class="p-4 text-center">
+                                        <span class="status-badge status-completed">Actif</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="px-3 py-1 bg-brand-text-secondary bg-opacity-10 text-brand-text-secondary rounded-full text-xs font-semibold">Standard</span>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="w-8 h-8 flex items-center justify-center text-brand-text-secondary hover:text-brand-accent hover:bg-brand-dark-bg rounded-lg transition-all">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mt-6 pt-6 border-t border-brand-dark-border">
+                        <p class="text-sm text-brand-text-secondary">Affichage de 1 à 8 sur 1,247 clients</p>
+                        <div class="flex items-center gap-2">
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-text-primary text-brand-dark-bg rounded-lg font-semibold">1</button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">2</button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">3</button>
+                            <span class="text-brand-text-secondary px-2">...</span>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">157</button>
+                            <button class="w-9 h-9 flex items-center justify-center bg-brand-dark-surface text-brand-text-secondary rounded-lg hover:bg-brand-dark-border transition-all">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+</body></html>

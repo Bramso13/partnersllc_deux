@@ -1,0 +1,573 @@
+<!DOCTYPE html><html lang="fr"><head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark-bg': '#191A1D',
+                        'brand-dark-surface': '#2D3033',
+                        'brand-dark-border': '#363636',
+                        'brand-text-primary': '#F9F9F9',
+                        'brand-text-secondary': '#B7B7B7',
+                        'brand-accent': '#00F0FF',
+                        'brand-success': '#4ADE80',
+                        'brand-warning': '#FACC15',
+                        'brand-danger': '#F95757'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-accent': '0 0 15px rgba(0, 240, 255, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <script>window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #191A1D;
+            color: #F9F9F9;
+        }
+        .setting-card {
+            transition: all 0.3s ease;
+        }
+        .setting-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 240, 255, 0.1);
+        }
+        .toggle-switch {
+            width: 48px;
+            height: 24px;
+            background-color: #363636;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .toggle-switch.active {
+            background-color: #00F0FF;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: white;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s ease;
+        }
+        .toggle-switch.active::after {
+            left: 27px;
+        }
+        .tab-button {
+            transition: all 0.2s ease;
+        }
+        .tab-button.active {
+            background-color: #F9F9F9;
+            color: #191A1D;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark-bg">
+    
+    <div id="main-container" class="flex min-h-[1024px] overflow-hidden">
+        
+        <aside id="sidebar-admin" class="w-72 bg-brand-dark-bg text-brand-text-secondary flex flex-col p-4">
+            <div id="sidebar-header" class="p-4 mb-8">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved text-brand-accent text-lg"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-brand-text-primary tracking-wide">PARTNERS</h1>
+                </div>
+                <p class="text-xs text-gray-500 mt-1 ml-14">Back-Office</p>
+            </div>
+            
+            <nav id="sidebar-nav-admin" class="flex-1 space-y-2">
+                <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-chart-pie w-6"></i>
+                    <span>Vue d'ensemble</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-users-gear w-6"></i>
+                    <span>Gestion Clients</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-folder-tree w-6"></i>
+                    <span>Dossiers LLC</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar w-6"></i>
+                    <span>Facturation</span>
+                </a>
+                
+                <div class="pt-6">
+                    <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Outils</p>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-bullhorn w-6"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-chart-line w-6"></i>
+                        <span>Rapports</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-text-primary text-brand-dark-bg font-bold">
+                        <i class="fa-solid fa-gear w-6"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div id="sidebar-footer-admin" class="p-2">
+                <div class="bg-brand-dark-surface rounded-xl p-4 text-center">
+                    <p class="text-sm text-brand-text-secondary">© 2025 PARTNERS LLC</p>
+                    <p class="text-xs text-gray-500 mt-1">Tous droits réservés</p>
+                </div>
+            </div>
+        </aside>
+        
+        <main id="main-content" class="flex-1 flex flex-col overflow-hidden bg-brand-dark-surface rounded-l-3xl">
+            
+            <header id="header-admin" class="px-8 py-5 flex items-center justify-between border-b border-brand-dark-border">
+                <div class="flex-1 max-w-lg">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-secondary"></i>
+                        <input type="text" placeholder="Rechercher dans les paramètres..." class="w-full bg-brand-dark-bg border border-brand-dark-border rounded-lg pl-10 pr-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <button class="relative text-brand-text-secondary hover:text-brand-text-primary transition-colors">
+                        <i class="fa-solid fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-danger rounded-full border-2 border-brand-dark-surface"></span>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Admin Profile" class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-primary">Sarah Connor</p>
+                            <p class="text-xs text-brand-text-secondary">Administratrice</p>
+                        </div>
+                        <button class="text-brand-text-secondary hover:text-brand-text-primary">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <div id="settings-content" class="flex-1 overflow-y-auto px-8 py-8">
+                
+                <div id="page-header-settings" class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-text-primary">Paramètres</h2>
+                        <p class="text-brand-text-secondary mt-1">Configuration et préférences de la plateforme</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="px-4 py-2.5 bg-brand-dark-bg text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center gap-2 border border-brand-dark-border">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span>Réinitialiser</span>
+                        </button>
+                        <button class="px-4 py-2.5 bg-brand-accent text-brand-dark-bg rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Enregistrer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="settings-tabs" class="flex gap-3 mb-8 border-b border-brand-dark-border pb-4">
+                    <button class="tab-button active px-6 py-2.5 bg-brand-text-primary text-brand-dark-bg rounded-lg font-semibold">Général</button>
+                    <button class="tab-button px-6 py-2.5 bg-brand-dark-bg text-brand-text-secondary rounded-lg font-semibold hover:bg-brand-dark-border">Sécurité</button>
+                    <button class="tab-button px-6 py-2.5 bg-brand-dark-bg text-brand-text-secondary rounded-lg font-semibold hover:bg-brand-dark-border">Notifications</button>
+                    <button class="tab-button px-6 py-2.5 bg-brand-dark-bg text-brand-text-secondary rounded-lg font-semibold hover:bg-brand-dark-border">Intégrations</button>
+                    <button class="tab-button px-6 py-2.5 bg-brand-dark-bg text-brand-text-secondary rounded-lg font-semibold hover:bg-brand-dark-border">Système</button>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                    <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-brand-text-primary mb-2">Informations de l'entreprise</h3>
+                                <p class="text-sm text-brand-text-secondary">Détails et coordonnées de PARTNERS LLC</p>
+                            </div>
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-building text-brand-accent text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-brand-text-secondary mb-2">Nom de l'entreprise</label>
+                                <input type="text" value="PARTNERS LLC" class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-brand-text-secondary mb-2">Email principal</label>
+                                <input type="email" value="contact@partners-llc.com" class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-brand-text-secondary mb-2">Téléphone</label>
+                                <input type="tel" value="+1 (555) 123-4567" class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-brand-text-primary mb-2">Adresse</h3>
+                                <p class="text-sm text-brand-text-secondary">Localisation du siège social</p>
+                            </div>
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-location-dot text-brand-success text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-brand-text-secondary mb-2">Rue</label>
+                                <input type="text" value="123 Business Avenue" class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-brand-text-secondary mb-2">Ville</label>
+                                    <input type="text" value="Wilmington" class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-brand-text-secondary mb-2">État</label>
+                                    <select class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                        <option>Delaware</option>
+                                        <option>Wyoming</option>
+                                        <option>Nevada</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-brand-text-secondary mb-2">Code postal</label>
+                                <input type="text" value="19801" class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 mb-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-brand-text-primary mb-2">Préférences d'affichage</h3>
+                            <p class="text-sm text-brand-text-secondary">Personnaliser l'apparence de l'interface</p>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-palette text-brand-warning text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-brand-text-secondary mb-2">Langue</label>
+                            <select class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                <option>Français</option>
+                                <option>English</option>
+                                <option>Español</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-brand-text-secondary mb-2">Fuseau horaire</label>
+                            <select class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                <option>UTC-05:00 (EST)</option>
+                                <option>UTC+01:00 (CET)</option>
+                                <option>UTC+02:00 (EET)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-brand-text-secondary mb-2">Format de date</label>
+                            <select class="w-full bg-brand-dark-surface border border-brand-dark-border rounded-lg px-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                                <option>DD/MM/YYYY</option>
+                                <option>MM/DD/YYYY</option>
+                                <option>YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 mb-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-brand-text-primary mb-2">Paramètres de notification</h3>
+                            <p class="text-sm text-brand-text-secondary">Gérer les alertes et notifications</p>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-bell text-brand-danger text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                            <div>
+                                <p class="text-sm font-semibold text-brand-text-primary">Notifications email</p>
+                                <p class="text-xs text-brand-text-secondary mt-1">Recevoir les alertes par email</p>
+                            </div>
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                            <div>
+                                <p class="text-sm font-semibold text-brand-text-primary">Notifications push</p>
+                                <p class="text-xs text-brand-text-secondary mt-1">Alertes dans le navigateur</p>
+                            </div>
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                            <div>
+                                <p class="text-sm font-semibold text-brand-text-primary">Notifications SMS</p>
+                                <p class="text-xs text-brand-text-secondary mt-1">Alertes urgentes par SMS</p>
+                            </div>
+                            <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                            <div>
+                                <p class="text-sm font-semibold text-brand-text-primary">Résumé hebdomadaire</p>
+                                <p class="text-xs text-brand-text-secondary mt-1">Rapport d'activité chaque lundi</p>
+                            </div>
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                    <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-brand-text-primary mb-2">Sécurité</h3>
+                                <p class="text-sm text-brand-text-secondary">Protection et authentification</p>
+                            </div>
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-shield-halved text-brand-accent text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                                <div>
+                                    <p class="text-sm font-semibold text-brand-text-primary">Authentification 2FA</p>
+                                    <p class="text-xs text-brand-text-secondary mt-1">Double vérification activée</p>
+                                </div>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                                <div>
+                                    <p class="text-sm font-semibold text-brand-text-primary">Déconnexion automatique</p>
+                                    <p class="text-xs text-brand-text-secondary mt-1">Après 30 min d'inactivité</p>
+                                </div>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <button class="w-full px-4 py-3 bg-brand-dark-surface text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center justify-center gap-2 border border-brand-dark-border">
+                                <i class="fa-solid fa-key"></i>
+                                <span>Changer le mot de passe</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-brand-text-primary mb-2">Sessions actives</h3>
+                                <p class="text-sm text-brand-text-secondary">Appareils connectés</p>
+                            </div>
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-devices text-brand-success text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-laptop text-brand-accent text-xl"></i>
+                                    <div>
+                                        <p class="text-sm font-semibold text-brand-text-primary">MacBook Pro</p>
+                                        <p class="text-xs text-brand-text-secondary">Chrome • New York, US</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 bg-brand-success bg-opacity-10 text-brand-success rounded-full text-xs font-semibold">Actif</span>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-mobile-screen text-brand-text-secondary text-xl"></i>
+                                    <div>
+                                        <p class="text-sm font-semibold text-brand-text-primary">iPhone 14 Pro</p>
+                                        <p class="text-xs text-brand-text-secondary">Safari • Il y a 2h</p>
+                                    </div>
+                                </div>
+                                <button class="text-brand-danger hover:underline text-sm font-semibold">Déconnecter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 mb-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-brand-text-primary mb-2">Intégrations API</h3>
+                            <p class="text-sm text-brand-text-secondary">Services tiers connectés</p>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-plug text-brand-warning text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div class="p-4 bg-brand-dark-surface rounded-lg border border-brand-dark-border">
+                            <div class="flex items-center justify-between mb-3">
+                                <i class="fa-brands fa-stripe text-3xl" style="color: #635BFF;"></i>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <p class="text-sm font-semibold text-brand-text-primary mb-1">Stripe</p>
+                            <p class="text-xs text-brand-text-secondary">Paiements en ligne</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg border border-brand-dark-border">
+                            <div class="flex items-center justify-between mb-3">
+                                <i class="fa-brands fa-slack text-3xl" style="color: #4A154B;"></i>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <p class="text-sm font-semibold text-brand-text-primary mb-1">Slack</p>
+                            <p class="text-xs text-brand-text-secondary">Notifications équipe</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg border border-brand-dark-border">
+                            <div class="flex items-center justify-between mb-3">
+                                <i class="fa-brands fa-google text-3xl" style="color: #4285F4;"></i>
+                                <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <p class="text-sm font-semibold text-brand-text-primary mb-1">Google Drive</p>
+                            <p class="text-xs text-brand-text-secondary">Stockage documents</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg border border-brand-dark-border">
+                            <div class="flex items-center justify-between mb-3">
+                                <i class="fa-brands fa-mailchimp text-3xl" style="color: #FFE01B;"></i>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <p class="text-sm font-semibold text-brand-text-primary mb-1">Mailchimp</p>
+                            <p class="text-xs text-brand-text-secondary">Email marketing</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg border border-brand-dark-border">
+                            <div class="flex items-center justify-between mb-3">
+                                <i class="fa-brands fa-aws text-3xl" style="color: #FF9900;"></i>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <p class="text-sm font-semibold text-brand-text-primary mb-1">AWS</p>
+                            <p class="text-xs text-brand-text-secondary">Infrastructure cloud</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg border border-brand-dark-border">
+                            <div class="flex items-center justify-between mb-3">
+                                <i class="fa-brands fa-hubspot text-3xl" style="color: #FF7A59;"></i>
+                                <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <p class="text-sm font-semibold text-brand-text-primary mb-1">HubSpot</p>
+                            <p class="text-xs text-brand-text-secondary">CRM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                    <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-brand-text-primary mb-2">Sauvegarde &amp; Export</h3>
+                                <p class="text-sm text-brand-text-secondary">Gestion des données</p>
+                            </div>
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-database text-brand-accent text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-brand-dark-surface rounded-lg">
+                                <div>
+                                    <p class="text-sm font-semibold text-brand-text-primary">Sauvegarde automatique</p>
+                                    <p class="text-xs text-brand-text-secondary mt-1">Quotidienne à 2h00 AM</p>
+                                </div>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <button class="w-full px-4 py-3 bg-brand-dark-surface text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center justify-center gap-2 border border-brand-dark-border">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Exporter toutes les données</span>
+                            </button>
+                            <div class="p-4 bg-brand-dark-surface rounded-lg">
+                                <p class="text-xs text-brand-text-secondary mb-2">Dernière sauvegarde</p>
+                                <p class="text-sm font-semibold text-brand-text-primary">15 Dec 2025 à 02:00 AM</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-brand-text-primary mb-2">Support &amp; Aide</h3>
+                                <p class="text-sm text-brand-text-secondary">Assistance technique</p>
+                            </div>
+                            <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-headset text-brand-success text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <button class="w-full px-4 py-3 bg-brand-dark-surface text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center justify-between border border-brand-dark-border">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-book"></i>
+                                    <span>Documentation</span>
+                                </div>
+                                <i class="fa-solid fa-arrow-right text-brand-text-secondary"></i>
+                            </button>
+                            <button class="w-full px-4 py-3 bg-brand-dark-surface text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center justify-between border border-brand-dark-border">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-comments"></i>
+                                    <span>Chat en direct</span>
+                                </div>
+                                <span class="px-2 py-1 bg-brand-success bg-opacity-10 text-brand-success rounded-full text-xs font-semibold">En ligne</span>
+                            </button>
+                            <button class="w-full px-4 py-3 bg-brand-dark-surface text-brand-text-primary rounded-lg font-semibold hover:bg-brand-dark-border transition-all flex items-center justify-between border border-brand-dark-border">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    <span>Contacter le support</span>
+                                </div>
+                                <i class="fa-solid fa-arrow-right text-brand-text-secondary"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-card bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-brand-text-primary mb-2">Informations système</h3>
+                            <p class="text-sm text-brand-text-secondary">Version et performances</p>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-server text-brand-text-secondary text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <div class="p-4 bg-brand-dark-surface rounded-lg">
+                            <p class="text-xs text-brand-text-secondary mb-2">Version</p>
+                            <p class="text-lg font-bold text-brand-text-primary">v2.4.1</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg">
+                            <p class="text-xs text-brand-text-secondary mb-2">Uptime</p>
+                            <p class="text-lg font-bold text-brand-text-primary">99.98%</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg">
+                            <p class="text-xs text-brand-text-secondary mb-2">Stockage utilisé</p>
+                            <p class="text-lg font-bold text-brand-text-primary">847 GB</p>
+                        </div>
+                        <div class="p-4 bg-brand-dark-surface rounded-lg">
+                            <p class="text-xs text-brand-text-secondary mb-2">Dernière MAJ</p>
+                            <p class="text-lg font-bold text-brand-text-primary">12 Dec 2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+</body></html>

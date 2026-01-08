@@ -1,0 +1,405 @@
+<!DOCTYPE html><html lang="fr"><head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark-bg': '#191A1D', // Main background
+                        'brand-dark-surface': '#2D3033', // Card/component background
+                        'brand-dark-border': '#363636',
+                        'brand-text-primary': '#F9F9F9',
+                        'brand-text-secondary': '#B7B7B7',
+                        'brand-accent': '#00F0FF', // A vibrant accent color
+                        'brand-success': '#4ADE80', // Green for success states
+                        'brand-warning': '#FACC15', // Yellow for in-progress
+                        'brand-danger': '#F95757'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-accent': '0 0 15px rgba(0, 240, 255, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-3.1.1.min.js"></script>
+    <script>window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #191A1D;
+            color: #F9F9F9;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-completed {
+            background-color: rgba(74, 222, 128, 0.1);
+            color: #4ADE80;
+        }
+        .status-progress {
+            background-color: rgba(250, 204, 21, 0.1);
+            color: #FACC15;
+        }
+        .status-pending {
+            background-color: rgba(249, 87, 87, 0.1);
+            color: #F95757;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark-bg">
+    
+    <div id="main-container" class="flex min-h-[1024px] overflow-hidden">
+        
+        <aside id="sidebar-admin" class="w-72 bg-brand-dark-bg text-brand-text-secondary flex flex-col p-4">
+            <div id="sidebar-header" class="p-4 mb-8">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved text-brand-accent text-lg"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-brand-text-primary tracking-wide">PARTNERS</h1>
+                </div>
+                 <p class="text-xs text-gray-500 mt-1 ml-14">Back-Office</p>
+            </div>
+            
+            <nav id="sidebar-nav-admin" class="flex-1 space-y-2">
+                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-text-primary text-brand-dark-bg font-bold">
+                    <i class="fa-solid fa-chart-pie w-6"></i>
+                    <span>Vue d'ensemble</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-users-gear w-6"></i>
+                    <span>Gestion Clients</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-folder-tree w-6"></i>
+                    <span>Dossiers LLC</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar w-6"></i>
+                    <span>Facturation</span>
+                </a>
+                
+                <div class="pt-6">
+                    <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Outils</p>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-bullhorn w-6"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-chart-line w-6"></i>
+                        <span>Rapports</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all">
+                        <i class="fa-solid fa-gear w-6"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div id="sidebar-footer-admin" class="p-2">
+                 <div class="bg-brand-dark-surface rounded-xl p-4 text-center">
+                    <p class="text-sm text-brand-text-secondary">© 2025 PARTNERS LLC</p>
+                    <p class="text-xs text-gray-500 mt-1">Tous droits réservés</p>
+                 </div>
+            </div>
+        </aside>
+        
+        <main id="main-content" class="flex-1 flex flex-col overflow-hidden bg-brand-dark-surface rounded-l-3xl">
+            
+            <header id="header-admin" class="px-8 py-5 flex items-center justify-between border-b border-brand-dark-border">
+                <div class="flex-1 max-w-lg">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-secondary"></i>
+                        <input type="text" placeholder="Rechercher un client, un dossier..." class="w-full bg-brand-dark-bg border border-brand-dark-border rounded-lg pl-10 pr-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <button class="relative text-brand-text-secondary hover:text-brand-text-primary transition-colors">
+                        <i class="fa-solid fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-danger rounded-full border-2 border-brand-dark-surface"></span>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Admin Profile" class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-primary">Sarah Connor</p>
+                            <p class="text-xs text-brand-text-secondary">Administratrice</p>
+                        </div>
+                        <button class="text-brand-text-secondary hover:text-brand-text-primary">
+                             <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <div id="admin-dashboard-content" class="flex-1 overflow-y-auto px-8 py-8">
+                
+                <div id="page-header-admin" class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-brand-text-primary">Vue d'ensemble</h2>
+                        <p class="text-brand-text-secondary mt-1">Bienvenue sur le tableau de bord administrateur.</p>
+                    </div>
+                    <button class="px-4 py-2.5 bg-brand-accent text-brand-dark-bg rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nouveau Dossier</span>
+                    </button>
+                </div>
+
+                <div id="kpi-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-secondary">Nouveaux Clients (30j)</p>
+                            <p class="text-4xl font-bold text-brand-text-primary mt-2">42</p>
+                            <div class="flex items-center text-sm text-brand-success mt-1">
+                                <i class="fa-solid fa-arrow-up mr-1 text-xs"></i>
+                                <span>+15.2%</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-user-plus text-brand-accent text-xl"></i>
+                        </div>
+                    </div>
+                     <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-secondary">Dossiers en Cours</p>
+                            <p class="text-4xl font-bold text-brand-text-primary mt-2">128</p>
+                            <div class="flex items-center text-sm text-brand-warning mt-1">
+                                <i class="fa-solid fa-spinner mr-1 text-xs"></i>
+                                <span>5 en attente</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                           <i class="fa-solid fa-folder-open text-brand-accent text-xl"></i>
+                        </div>
+                    </div>
+                     <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-secondary">Dossiers Terminés</p>
+                            <p class="text-4xl font-bold text-brand-text-primary mt-2">893</p>
+                            <div class="flex items-center text-sm text-brand-success mt-1">
+                                <i class="fa-solid fa-check-circle mr-1 text-xs"></i>
+                                <span>+34 ce mois</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-check-double text-brand-accent text-xl"></i>
+                        </div>
+                    </div>
+                     <div class="bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-brand-text-secondary">Revenus (30j)</p>
+                            <p class="text-4xl font-bold text-brand-text-primary mt-2">€25.6K</p>
+                            <div class="flex items-center text-sm text-brand-success mt-1">
+                                <i class="fa-solid fa-arrow-up mr-1 text-xs"></i>
+                                <span>+8.5%</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-dark-surface rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-sack-dollar text-brand-accent text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="main-chart-section" class="mt-8 grid grid-cols-12 gap-6">
+                    <div class="col-span-12 xl:col-span-8 bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-brand-text-primary">Activité des Dossiers</h3>
+                             <div class="flex items-center space-x-1 bg-brand-dark-surface p-1 rounded-lg border border-brand-dark-border">
+                                <button class="px-3 py-1 text-sm rounded-md bg-brand-dark-bg text-brand-text-primary font-semibold">Mois</button>
+                                <button class="px-3 py-1 text-sm rounded-md text-brand-text-secondary hover:text-brand-text-primary">Année</button>
+                            </div>
+                        </div>
+                        <div id="activity-chart" class="w-full h-[350px]"></div>
+                    </div>
+                    <div class="col-span-12 xl:col-span-4 bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-brand-text-primary">Tâches Prioritaires</h3>
+                            <a href="#" class="text-sm font-semibold text-brand-accent hover:underline">Voir tout</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center p-3 bg-brand-dark-surface rounded-lg">
+                                <div class="w-5 h-5 border-2 border-brand-danger rounded-md mr-4"></div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-brand-text-primary">Valider documents - J. Dupont</p>
+                                    <p class="text-xs text-brand-text-secondary">Dossier #0894 - Échéance: Demain</p>
+                                </div>
+                                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" class="w-8 h-8 rounded-full ml-2 object-cover">
+                            </div>
+                            <div class="flex items-center p-3 bg-brand-dark-surface rounded-lg">
+                                <div class="w-5 h-5 border-2 border-brand-warning rounded-md mr-4"></div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-brand-text-primary">Relance paiement - A. Martin</p>
+                                    <p class="text-xs text-brand-text-secondary">Facture #INV-0144 - En retard de 3 jours</p>
+                                </div>
+                                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" class="w-8 h-8 rounded-full ml-2 object-cover">
+                            </div>
+                            <div class="flex items-center p-3 bg-brand-dark-surface rounded-lg">
+                                <div class="w-5 h-5 border-2 border-brand-text-secondary rounded-md mr-4"></div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-brand-text-primary">Préparer rapport annuel</p>
+                                    <p class="text-xs text-brand-text-secondary">Finances Q4 2025</p>
+                                </div>
+                                 <div class="w-8 h-8 rounded-full ml-2 bg-brand-dark-bg flex items-center justify-center">
+                                    <i class="fa-solid fa-chart-line text-brand-text-secondary"></i>
+                                 </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-brand-dark-surface rounded-lg opacity-60">
+                                <div class="w-5 h-5 border-2 border-brand-success bg-brand-success flex items-center justify-center rounded-md mr-4">
+                                    <i class="fa-solid fa-check text-xs text-brand-dark-bg"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-brand-text-primary line-through">Obtenir l'EIN pour Global Exports</p>
+                                    <p class="text-xs text-brand-text-secondary">Dossier #0891 - Terminé hier</p>
+                                </div>
+                                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-9.jpg" class="w-8 h-8 rounded-full ml-2 object-cover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="recent-dossiers-section" class="mt-8 bg-brand-dark-bg rounded-2xl border border-brand-dark-border p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-brand-text-primary">Dossiers Récents</h3>
+                        <a href="#" class="text-sm font-semibold text-brand-accent hover:underline">Voir tout</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-brand-dark-border">
+                                    <th class="p-3 text-xs font-semibold text-brand-text-secondary uppercase">Client</th>
+                                    <th class="p-3 text-xs font-semibold text-brand-text-secondary uppercase">Entreprise</th>
+                                    <th class="p-3 text-xs font-semibold text-brand-text-secondary uppercase">Date Création</th>
+                                    <th class="p-3 text-xs font-semibold text-brand-text-secondary uppercase text-center">Statut</th>
+                                    <th class="p-3 text-xs font-semibold text-brand-text-secondary uppercase text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors">
+                                    <td class="p-4"><div class="flex items-center gap-3"><img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" class="w-9 h-9 rounded-full object-cover"><span class="font-medium text-brand-text-primary">Marc Leblanc</span></div></td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Innovatech Solutions LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">15 Déc 2025</td>
+                                    <td class="p-4 text-center"><span class="status-badge status-completed">Terminé</span></td>
+                                    <td class="p-4 text-right"><button class="text-brand-text-secondary hover:text-brand-accent"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                                </tr>
+                               <tr class="border-b border-brand-dark-border hover:bg-brand-dark-surface transition-colors">
+                                    <td class="p-4"><div class="flex items-center gap-3"><img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg" class="w-9 h-9 rounded-full object-cover"><span class="font-medium text-brand-text-primary">Chloé Dubois</span></div></td>
+                                    <td class="p-4 text-sm text-brand-text-primary">CréaHub Digital LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">12 Déc 2025</td>
+                                    <td class="p-4 text-center"><span class="status-badge status-progress">Validation EIN</span></td>
+                                    <td class="p-4 text-right"><button class="text-brand-text-secondary hover:text-brand-accent"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                                </tr>
+                                <tr class="hover:bg-brand-dark-surface transition-colors">
+                                    <td class="p-4"><div class="flex items-center gap-3"><img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" class="w-9 h-9 rounded-full object-cover"><span class="font-medium text-brand-text-primary">Lucas Moreau</span></div></td>
+                                    <td class="p-4 text-sm text-brand-text-primary">Quantum Leap LLC</td>
+                                    <td class="p-4 text-sm text-brand-text-secondary">10 Déc 2025</td>
+                                    <td class="p-4 text-center"><span class="status-badge status-pending">Doc. en attente</span></td>
+                                    <td class="p-4 text-right"><button class="text-brand-text-secondary hover:text-brand-accent"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+<script>
+window.addEventListener('load', function() {
+    try {
+        const activityChart = document.getElementById('activity-chart');
+        if (activityChart) {
+            const data = [{
+                x: ['1 Nov', '5 Nov', '10 Nov', '15 Nov', '20 Nov', '25 Nov', '30 Nov', '5 Déc', '10 Déc', '15 Déc'],
+                y: [5, 8, 6, 10, 7, 11, 9, 14, 12, 16],
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Dossiers Créés',
+                line: {
+                    color: '#00F0FF',
+                    width: 3,
+                    shape: 'spline'
+                },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(0, 240, 255, 0.1)',
+                hovertemplate: '<b>%{x}</b><br>%{y} dossiers créés<extra></extra>'
+            }, {
+                x: ['1 Nov', '5 Nov', '10 Nov', '15 Nov', '20 Nov', '25 Nov', '30 Nov', '5 Déc', '10 Déc', '15 Déc'],
+                y: [3, 4, 5, 6, 8, 7, 10, 9, 11, 10],
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Dossiers Terminés',
+                line: {
+                    color: '#B7B7B7',
+                    width: 2,
+                    dash: 'dash',
+                    shape: 'spline'
+                },
+                hovertemplate: '<b>%{x}</b><br>%{y} dossiers terminés<extra></extra>'
+            }];
+
+            const layout = {
+                font: {
+                    family: 'Inter, sans-serif',
+                    color: '#B7B7B7'
+                },
+                xaxis: {
+                    gridcolor: '#363636',
+                    linecolor: '#363636',
+                    zeroline: false,
+                    showgrid: true
+                },
+                yaxis: {
+                    gridcolor: '#363636',
+                    linecolor: '#363636',
+                    zeroline: false,
+                    showgrid: true
+                },
+                margin: { t: 20, r: 20, b: 30, l: 30 },
+                plot_bgcolor: '#191A1D',
+                paper_bgcolor: '#191A1D',
+                showlegend: true,
+                legend: {
+                    x: 0.5,
+                    xanchor: 'center',
+                    y: 1.15,
+                    orientation: 'h'
+                },
+                hovermode: 'x unified'
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: false,
+                displaylogo: false
+            };
+
+            Plotly.newPlot('activity-chart', data, layout, config);
+        }
+    } catch (e) {
+        console.error("Error rendering chart:", e);
+        const chartContainer = document.getElementById('activity-chart');
+        if (chartContainer) {
+            chartContainer.innerHTML = '<div class="text-center text-brand-text-secondary p-4">Erreur lors du chargement du graphique.</div>';
+        }
+    }
+});
+</script>
+
+</body></html>

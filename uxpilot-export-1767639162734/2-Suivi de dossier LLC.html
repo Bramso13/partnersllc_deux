@@ -1,0 +1,439 @@
+<html lang="fr">
+
+  <head>
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Dossier LLC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme:
+        {
+          extend:
+          {
+            colors:
+            {
+              'brand-dark-bg': '#191A1D', // Main background
+              'brand-dark-surface': '#2D3033', // Card/component background
+              'brand-dark-border': '#363636',
+              'brand-text-primary': '#F9F9F9',
+              'brand-text-secondary': '#B7B7B7',
+              'brand-accent': '#00F0FF', // A vibrant accent color
+              'brand-success': '#4ADE80', // Green for success states
+              'brand-warning': '#FACC15', // Yellow for in-progress
+              'brand-danger': '#F95757'
+            },
+            fontFamily:
+            {
+              'sans': ['Inter', 'system-ui', 'sans-serif'],
+            },
+            boxShadow:
+            {
+              'glow-accent': '0 0 15px rgba(0, 240, 255, 0.15)',
+              'glow-success': '0 0 15px rgba(74, 222, 128, 0.2)',
+              'glow-warning': '0 0 15px rgba(250, 204, 21, 0.2)'
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
+      rel="stylesheet">
+    <script>
+      window.FontAwesomeConfig = {
+        autoReplaceSvg: 'nest'
+      };
+    </script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+      ::-webkit-scrollbar
+      {
+        display: none;
+      }
+
+      body
+      {
+        font-family: 'Inter', sans-serif;
+        background-color: #191A1D;
+        color: #F9F9F9;
+      }
+
+      .card-hover
+      {
+        transition: all 0.3s ease-in-out;
+      }
+
+      .card-hover:hover
+      {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .step-connector
+      {
+        position: absolute;
+        left: 20px;
+        top: 48px;
+        width: 2px;
+        height: calc(100% - 40px);
+        background-color: #363636;
+      }
+
+      .step-item:last-child .step-connector
+      {
+        display: none;
+      }
+    </style>
+    <style data-grapesjs-styles="true">
+      *
+      {
+        box-sizing: border-box;
+      }
+
+      body
+      {
+        margin: 0;
+      }
+
+      ::-webkit-scrollbar
+      {
+        display: none;
+      }
+
+      body
+      {
+        font-family: Inter, sans-serif;
+        background-color: rgb(25, 26, 29);
+        color: rgb(249, 249, 249);
+      }
+
+      .card-hover
+      {
+        transition-behavior: normal;
+        transition-duration: 0.3s;
+        transition-timing-function: ease-in-out;
+        transition-delay: 0s;
+        transition-property: all;
+      }
+
+      .card-hover:hover
+      {
+        transform: translateY(-4px);
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 20px;
+      }
+
+      .step-connector
+      {
+        position: absolute;
+        left: 20px;
+        top: 48px;
+        width: 2px;
+        height: calc(100% - 40px);
+        background-color: rgb(54, 54, 54);
+      }
+
+      .step-item:last-child .step-connector
+      {
+        display: none;
+      }
+
+      #ib1wly
+      {
+        width: 40%;
+      }
+
+      .w-full.h-full.object-contain
+      {
+        width: 97px;
+      }
+    </style>
+  </head>
+
+  <body class="bg-brand-dark-bg">
+    <div id="main-container" class="flex min-h-[1024px] overflow-hidden">
+      <aside id="sidebar"
+        class="w-72 bg-brand-dark-bg text-brand-text-secondary flex flex-col p-4">
+        <div id="sidebar-header" class="p-4 mb-8">
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-[62px] h-[60px] bg-brand-dark-surface rounded-lg flex items-center justify-center overflow-hidden">
+              <img
+                src="data:image/png;base64,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"
+                alt="modern minimalist LLC company logo icon, professional business emblem, dark background"
+                class="w-full h-full object-contain"></div>
+          </div>
+        </div>
+        <nav id="sidebar-nav" class="flex-1 space-y-2">
+          <p
+            class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            Menu</p><a href="#"
+            class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all"><i
+              class="fa-solid fa-chart-pie w-6"></i><span>Tableau de
+              bord</span></a><a href="#"
+            class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-text-primary text-brand-dark-bg font-bold"><i
+              class="fa-solid fa-list-check w-6"></i><span>Mon dossier
+              LLC</span></a><a href="#"
+            class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all"><i
+              class="fa-solid fa-folder-open w-6"></i><span>Documents</span></a><a
+            href="#"
+            class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all"><i
+              class="fa-solid fa-users w-6"></i><span>PARTNERS Hub</span></a><a
+            href="#"
+            class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all"><i
+              class="fa-solid fa-graduation-cap w-6"></i><span>Formation</span></a>
+          <div class="pt-6">
+            <p
+              class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              Support</p><a href="#"
+              class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all"><i
+                class="fa-solid fa-headset w-6"></i><span>Support</span></a><a
+              href="#"
+              class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-brand-dark-surface hover:text-brand-text-primary transition-all"><i
+                class="fa-solid fa-gear w-6"></i><span>Paramètres</span></a>
+          </div>
+        </nav>
+        <div id="sidebar-footer" class="p-2">
+          <div class="bg-brand-dark-surface rounded-xl p-4">
+            <h4 class="font-semibold text-brand-text-primary">Besoin d'aide ?
+            </h4>
+            <p class="text-sm mt-1 mb-3">Contactez votre conseiller dédié pour
+              toute question.</p><button
+              class="w-full py-2 bg-brand-accent text-brand-dark-bg rounded-lg font-semibold hover:opacity-90 transition-opacity">Contacter</button>
+          </div>
+        </div>
+      </aside>
+      <main id="main-content"
+        class="flex-1 flex flex-col overflow-hidden bg-brand-dark-surface rounded-l-3xl">
+        <header id="header"
+          class="px-8 py-5 flex items-center justify-between border-b border-brand-dark-border">
+          <div class="flex-1 max-w-lg">
+            <div class="relative"><i
+                class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-secondary"></i><input
+                type="text" placeholder="Rechercher dans votre dossier..."
+                class="w-full bg-brand-dark-bg border border-brand-dark-border rounded-lg pl-10 pr-4 py-2.5 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent">
+            </div>
+          </div>
+          <div class="flex items-center space-x-6"><button
+              class="relative text-brand-text-secondary hover:text-brand-text-primary transition-colors"><i
+                class="fa-solid fa-bell text-xl"></i><span
+                class="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-danger rounded-full border-2 border-brand-dark-surface"></span></button>
+            <div class="flex items-center space-x-3"><img
+                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg"
+                alt="Profile" class="w-10 h-10 rounded-full object-cover">
+              <div>
+                <p class="text-sm font-medium text-brand-text-primary">Jean
+                  Dupont</p>
+                <p class="text-xs text-brand-text-secondary">Client Premium</p>
+              </div><button
+                class="text-brand-text-secondary hover:text-brand-text-primary"><i
+                  class="fa-solid fa-chevron-down text-xs"></i></button>
+            </div>
+          </div>
+        </header>
+        <div id="llc-dossier-content" class="flex-1 overflow-y-auto px-8 py-8">
+          <div id="page-header" class="mb-8">
+            <h2 class="text-3xl font-bold text-brand-text-primary">Création de
+              votre LLC</h2>
+            <p class="text-brand-text-secondary mt-1">Suivez les étapes
+              ci-dessous pour finaliser la création de votre entreprise.</p>
+          </div>
+          <div id="llc-creation-grid" class="grid grid-cols-12 gap-8">
+            <div id="steps-container" class="col-span-8">
+              <div class="space-y-6">
+                <!-- Step 1: Completed -->
+                <div
+                  class="step-item relative flex items-start p-6 bg-brand-dark-bg rounded-2xl border border-brand-dark-border card-hover">
+                  <div class="step-connector"></div>
+                  <div
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-success/20 flex items-center justify-center mr-5 ring-4 ring-brand-success/10">
+                    <i class="fas fa-check text-brand-success"></i></div>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-sm text-brand-success font-medium">Étape
+                          1</p>
+                        <h4
+                          class="font-semibold text-lg text-brand-text-primary">
+                          Informations de base</h4>
+                      </div><span
+                        class="text-xs font-medium text-brand-success bg-brand-success/10 px-2 py-1 rounded-full">Terminé</span>
+                    </div>
+                    <p class="text-sm text-brand-text-secondary mt-2">Les
+                      informations sur votre projet et vos coordonnées ont été
+                      enregistrées avec succès.</p>
+                  </div>
+                </div><!-- Step 2: Completed -->
+                <div
+                  class="step-item relative flex items-start p-6 bg-brand-dark-bg rounded-2xl border border-brand-dark-border card-hover">
+                  <div class="step-connector"></div>
+                  <div
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-success/20 flex items-center justify-center mr-5 ring-4 ring-brand-success/10">
+                    <i class="fas fa-check text-brand-success"></i></div>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-sm text-brand-success font-medium">Étape
+                          2</p>
+                        <h4
+                          class="font-semibold text-lg text-brand-text-primary">
+                          Vérification d'identité</h4>
+                      </div><span
+                        class="text-xs font-medium text-brand-success bg-brand-success/10 px-2 py-1 rounded-full">Terminé</span>
+                    </div>
+                    <p class="text-sm text-brand-text-secondary mt-2">Vos
+                      documents d'identité ont été vérifiés et approuvés par
+                      notre équipe.</p>
+                  </div>
+                </div><!-- Step 3: In Progress -->
+                <div
+                  class="step-item relative flex items-start p-6 bg-brand-dark-bg rounded-2xl border-2 border-brand-accent shadow-glow-accent card-hover">
+                  <div class="step-connector"></div>
+                  <div
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-warning/20 flex items-center justify-center mr-5 ring-4 ring-brand-warning/10">
+                    <i class="fas fa-pencil-alt text-brand-warning"></i></div>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-sm text-brand-warning font-medium">Étape
+                          3</p>
+                        <h4
+                          class="font-semibold text-lg text-brand-text-primary">
+                          Choix du nom et de l'État</h4>
+                      </div><span
+                        class="text-xs font-medium text-brand-warning bg-brand-warning/10 px-2 py-1 rounded-full">En
+                        cours</span>
+                    </div>
+                    <p class="text-sm text-brand-text-secondary mt-2 mb-4">
+                      Finalisez le choix du nom de votre LLC et de l'État
+                      d'enregistrement.</p><button
+                      class="px-5 py-2.5 bg-brand-accent text-brand-dark-bg rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity">Continuer</button>
+                  </div>
+                </div><!-- Step 4: To Do -->
+                <div
+                  class="step-item relative flex items-start p-6 bg-brand-dark-bg rounded-2xl border border-brand-dark-border opacity-60 card-hover">
+                  <div class="step-connector"></div>
+                  <div
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-dark-border flex items-center justify-center mr-5 ring-4 ring-brand-dark-surface">
+                    <i class="fas fa-clock text-brand-text-secondary"></i></div>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p
+                          class="text-sm text-brand-text-secondary font-medium">
+                          Étape 4</p>
+                        <h4
+                          class="font-semibold text-lg text-brand-text-secondary">
+                          Signature des documents</h4>
+                      </div>
+                    </div>
+                    <p class="text-sm text-brand-text-secondary mt-2">Le
+                      Certificate of Formation et l'Operating Agreement seront
+                      bientôt prêts pour signature.</p>
+                  </div>
+                </div><!-- Step 5: To Do -->
+                <div
+                  class="step-item relative flex items-start p-6 bg-brand-dark-bg rounded-2xl border border-brand-dark-border opacity-60 card-hover">
+                  <div
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-dark-border flex items-center justify-center mr-5 ring-4 ring-brand-dark-surface">
+                    <i class="fas fa-landmark text-brand-text-secondary"></i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p
+                          class="text-sm text-brand-text-secondary font-medium">
+                          Étape 5</p>
+                        <h4
+                          class="font-semibold text-lg text-brand-text-secondary">
+                          Obtention de l'EIN</h4>
+                      </div>
+                    </div>
+                    <p class="text-sm text-brand-text-secondary mt-2">Nous nous
+                      occupons de la demande de votre numéro d'identification
+                      fiscale auprès de l'IRS.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="summary-panel" class="col-span-4">
+              <div class="sticky top-8">
+                <div class="bg-brand-dark-bg rounded-2xl p-6 card-hover">
+                  <h3
+                    class="text-lg font-semibold text-brand-text-primary mb-1">
+                    Votre Dossier</h3>
+                  <p class="text-sm text-brand-text-secondary mb-5">Delaware
+                    Tech Solutions LLC</p>
+                  <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2"><span
+                        class="text-sm font-medium text-brand-text-secondary">Progression</span><span
+                        class="text-sm font-bold text-brand-accent">40%</span>
+                    </div>
+                    <div
+                      class="overflow-hidden h-2.5 text-xs flex rounded-full bg-brand-dark-surface">
+                      <div
+                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-brand-accent rounded-full transition-all duration-500"
+                        id="ib1wly"></div>
+                    </div>
+                  </div>
+                  <h4
+                    class="text-md font-semibold text-brand-text-primary mb-4">
+                    Prochaines étapes</h4>
+                  <ul class="space-y-3 text-sm">
+                    <li class="flex items-start"><i
+                        class="fa-solid fa-circle-check text-brand-warning mt-1 mr-3"></i><span
+                        class="text-brand-text-primary">Finaliser le nom de la
+                        société</span></li>
+                    <li class="flex items-start"><i
+                        class="fa-regular fa-circle text-brand-text-secondary mt-1 mr-3"></i><span
+                        class="text-brand-text-secondary">Signer les documents
+                        légaux</span></li>
+                    <li class="flex items-start"><i
+                        class="fa-regular fa-circle text-brand-text-secondary mt-1 mr-3"></i><span
+                        class="text-brand-text-secondary">Attendre l'approbation
+                        de l'État</span></li>
+                  </ul>
+                </div>
+                <div class="bg-brand-dark-bg rounded-2xl p-6 mt-6 card-hover">
+                  <h4
+                    class="text-md font-semibold text-brand-text-primary mb-4">
+                    Documents Requis</h4>
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center"><i
+                          class="fa-solid fa-id-card text-brand-success mr-3"></i><span
+                          class="text-brand-text-primary">Pièce
+                          d'identité</span></div><span
+                        class="text-brand-success font-medium">Validé</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center"><i
+                          class="fa-solid fa-file-invoice text-brand-success mr-3"></i><span
+                          class="text-brand-text-primary">Justificatif de
+                          domicile</span></div><span
+                        class="text-brand-success font-medium">Validé</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center"><i
+                          class="fa-solid fa-file-signature text-brand-warning mr-3"></i><span
+                          class="text-brand-text-primary">Formulaire
+                          W-8BEN</span></div><span
+                        class="text-brand-warning font-medium">En attente</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+
+</html>
