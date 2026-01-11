@@ -7,3 +7,5 @@ partnersllc-app/.env.production.local
 partnersllc-app/.pnpm-store
 partnersllc-app/.next
 partnersllc-app/node_modules
+
+.pnpm-store
