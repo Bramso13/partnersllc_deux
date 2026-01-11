@@ -4,12 +4,13 @@ import { getClientDossiers } from "@/lib/clients";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdminAuth();
 
-    const dossiers = await getClientDossiers(params.id);
+    const { id } = await params;
+    const dossiers = await getClientDossiers(id);
     return NextResponse.json(dossiers);
   } catch (error) {
     console.error("Error fetching client dossiers:", error);

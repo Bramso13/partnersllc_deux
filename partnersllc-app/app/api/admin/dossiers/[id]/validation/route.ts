@@ -66,7 +66,7 @@ export async function GET(
           rejection_reason: string | null;
           reviewed_by: string | null;
           reviewed_at: string | null;
-          step_fields: StepField;
+          step_fields: StepField | StepField[];
         }
 
         // Fetch fields for this step instance
@@ -100,20 +100,23 @@ export async function GET(
         }
 
         // Transform fields to flat structure
-        const transformedFields = (fields as FieldValueRow[] || []).map((f) => ({
-          id: f.id,
-          step_instance_id: f.step_instance_id,
-          step_field_id: f.step_field_id,
-          value: f.value,
-          value_jsonb: f.value_jsonb,
-          validation_status: f.validation_status,
-          rejection_reason: f.rejection_reason,
-          reviewed_by: f.reviewed_by,
-          reviewed_at: f.reviewed_at,
-          field_label: f.step_fields?.label || "Unknown",
-          field_type: f.step_fields?.field_type || "text",
-          is_required: f.step_fields?.is_required || false,
-        }));
+        const transformedFields = (fields as FieldValueRow[] || []).map((f) => {
+          const stepField = Array.isArray(f.step_fields) ? f.step_fields[0] : f.step_fields;
+          return {
+            id: f.id,
+            step_instance_id: f.step_instance_id,
+            step_field_id: f.step_field_id,
+            value: f.value,
+            value_jsonb: f.value_jsonb,
+            validation_status: f.validation_status,
+            rejection_reason: f.rejection_reason,
+            reviewed_by: f.reviewed_by,
+            reviewed_at: f.reviewed_at,
+            field_label: stepField?.label || "Unknown",
+            field_type: stepField?.field_type || "text",
+            is_required: stepField?.is_required || false,
+          };
+        });
 
         // Count approved fields
         const approvedCount = transformedFields.filter(

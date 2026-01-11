@@ -4,12 +4,13 @@ import { getClientEvents } from "@/lib/clients";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdminAuth();
 
-    const events = await getClientEvents(params.id);
+    const { id } = await params;
+    const events = await getClientEvents(id);
     return NextResponse.json(events);
   } catch (error) {
     console.error("Error fetching client events:", error);

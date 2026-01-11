@@ -118,7 +118,7 @@ export async function getProductSteps(
         position: ps.position,
         is_required: ps.is_required,
         estimated_duration_hours: ps.estimated_duration_hours,
-        step: ps.step as Step,
+        step: (Array.isArray(ps.step) ? ps.step[0] : ps.step) as Step,
         document_types: documentTypes,
       };
 
@@ -221,6 +221,6 @@ export async function getCurrentStepInstance(dossierId: string) {
 
   return {
     ...stepInstance,
-    step: stepInstance.step as Step,
+    step: (Array.isArray(stepInstance.step) ? stepInstance.step[0] : stepInstance.step) as Step,
   };
 }

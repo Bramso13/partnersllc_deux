@@ -93,8 +93,8 @@ export function validateField(
     }
   }
 
-  // Number validation
-  if (field.field_type === "number" || field.field_type === "text") {
+  // Number validation (for text fields that might contain numbers)
+  if (field.field_type === "text") {
     if (field.min_value !== null && !isNaN(Number(stringValue))) {
       if (Number(stringValue) < field.min_value) {
         return `La valeur minimale est ${field.min_value}`;

@@ -4,7 +4,7 @@ import { updateClientStatus } from "@/lib/clients";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = await requireAdminAuth();
@@ -21,7 +21,8 @@ export async function POST(
       );
     }
 
-    await updateClientStatus(params.id, status, reason, admin.id);
+    const { id } = await params;
+    await updateClientStatus(id, status, reason, admin.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

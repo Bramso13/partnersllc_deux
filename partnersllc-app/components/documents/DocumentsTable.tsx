@@ -49,7 +49,7 @@ export function DocumentsTable({
   };
 
   const getFileTypeIcon = (mimeType: string | null | undefined) => {
-    if (!mimeType) return "fa-file";
+    if (!mimeType) return { icon: "fa-file", color: "text-brand-text-secondary" };
 
     if (mimeType === "application/pdf") {
       return { icon: "fa-file-pdf", color: "text-brand-danger" };

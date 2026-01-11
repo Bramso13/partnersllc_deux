@@ -6,7 +6,7 @@ import crypto from "crypto";
 export async function POST(request: NextRequest) {
   try {
     // Auth check
-    await requireAdminAuth();
+    const user = await requireAdminAuth();
 
     const body = await request.json();
     const { prospect_email, prospect_name, product_id, expires_in_days } = body;

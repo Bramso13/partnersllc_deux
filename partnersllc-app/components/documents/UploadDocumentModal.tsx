@@ -11,7 +11,8 @@ interface UploadDocumentModalProps {
 
 interface Dossier {
   id: string;
-  product?: { name: string } | null;
+  product_id: string;
+  product: { name: string } | null;
 }
 
 export function UploadDocumentModal({
@@ -64,7 +65,15 @@ export function UploadDocumentModal({
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setDossiers((dossiersData || []) as Dossier[]);
+      
+      // Transform the data to match our Dossier type
+      const transformedDossiers = (dossiersData || []).map((d: any) => ({
+        id: d.id,
+        product_id: d.product_id,
+        product: Array.isArray(d.product) ? d.product[0] : d.product
+      }));
+      
+      setDossiers(transformedDossiers as Dossier[]);
     } catch (err: any) {
       setError("Erreur lors du chargement des dossiers");
       console.error(err);
@@ -181,17 +190,12 @@ export function UploadDocumentModal({
       const ext = selectedFile.name.split(".").pop();
       const storagePath = `documents/${selectedDossierId}/${docType.code}/1.${ext}`;
 
-      // Upload file with progress tracking
+      // Upload file
+      setUploadProgress(50); // Simulate progress
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("documents")
         .upload(storagePath, selectedFile, {
           cacheControl: "3600",
-          onUploadProgress: (progress) => {
-            const percent = Math.round(
-              (progress.loaded / progress.total) * 100
-            );
-            setUploadProgress(percent);
-          },
         });
 
       if (uploadError) {

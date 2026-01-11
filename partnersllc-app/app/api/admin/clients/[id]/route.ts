@@ -4,12 +4,13 @@ import { getClientById } from "@/lib/clients";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdminAuth();
 
-    const client = await getClientById(params.id);
+    const { id } = await params;
+    const client = await getClientById(id);
 
     if (!client) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });

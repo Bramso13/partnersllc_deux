@@ -56,7 +56,11 @@ export async function POST(
     }
 
     // Get or create agent ID for this user
-    const agentId = await getOrCreateAgent(profile.id, profile.full_name, profile.email);
+    const agentId = await getOrCreateAgent(
+      profile.id, 
+      profile.full_name ?? '', 
+      profile.email ?? ''
+    );
 
     const supabase = await createAdminClient();
 
