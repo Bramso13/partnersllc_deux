@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import type { UserRole } from "@/lib/user-role";
+import type { UserRole } from "@/types/auth";
 import type { NavConfig } from "@/lib/navigation-config";
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarNavSection } from "./SidebarNavSection";

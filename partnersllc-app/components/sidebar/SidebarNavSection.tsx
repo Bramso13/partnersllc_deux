@@ -1,5 +1,5 @@
 import type { NavSection } from "@/lib/navigation-config";
-import type { UserRole } from "@/lib/user-role";
+import type { UserRole } from "@/types/auth";
 import { SidebarNavItem } from "./SidebarNavItem";
 
 interface SidebarNavSectionProps {

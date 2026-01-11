@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { UserRole } from "@/lib/user-role";
+import type { UserRole } from "@/types/auth";
 import type { NavConfig } from "@/lib/navigation-config";
 import { Sidebar } from "./Sidebar";
 import { HamburgerButton } from "./HamburgerButton";

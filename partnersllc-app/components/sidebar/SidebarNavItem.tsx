@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavItem } from "@/lib/navigation-config";
-import type { UserRole } from "@/lib/user-role";
+import type { UserRole } from "@/types/auth";
 
 interface SidebarNavItemProps {
   item: NavItem;
@@ -16,7 +16,7 @@ export function SidebarNavItem({ item, role }: SidebarNavItemProps) {
   // Determine if this route should match exactly or with sub-routes
   // Routes that are "terminal" (like /dashboard) should only match exactly
   // Routes with children (like /dashboard/dossiers) should match with sub-routes
-  const isExactRoute = item.href === "/dashboard" || item.href === "/admin";
+  const isExactRoute = item.href === "/dashboard" || item.href === "/admin" || item.href === "/agent";
   
   const isActive = isExactRoute
     ? pathname === item.href
@@ -24,7 +24,7 @@ export function SidebarNavItem({ item, role }: SidebarNavItemProps) {
 
   // Active state styling based on role
   const activeStyles =
-    role === "client"
+    role === "CLIENT"
       ? "bg-[#50B88A] text-white font-bold"
       : "bg-[#F9F9F9] text-[#191A1D] font-bold";
 

@@ -5,6 +5,7 @@ import { ProductStep, Step } from "@/lib/workflow";
 import { StepField } from "@/types/qualification";
 import { DynamicFormField } from "@/components/qualification/DynamicFormField";
 import { validateForm, isFormValid } from "@/lib/validation";
+import { StepDocuments } from "./StepDocuments";
 
 interface WorkflowStepperProps {
   productSteps: ProductStep[];
@@ -53,6 +54,7 @@ export function WorkflowStepper({
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const [uploadedDocuments, setUploadedDocuments] = useState<any[]>([]);
 
   const currentStep = productSteps[currentStepIndex];
   const totalSteps = productSteps.length;
@@ -84,6 +86,22 @@ export function WorkflowStepper({
         if (!fieldsResponse.ok) throw new Error("Failed to load step fields");
         const fields: StepFieldWithValidation[] = await fieldsResponse.json();
         setCurrentStepFields(fields);
+
+        // Load uploaded documents for this dossier
+        const docsUrl = stepInstanceId
+          ? `/api/workflow/dossier-documents?dossier_id=${dossierId}&step_instance_id=${stepInstanceId}`
+          : `/api/workflow/dossier-documents?dossier_id=${dossierId}`;
+
+        console.log("[WorkflowStepper] Loading documents from:", docsUrl);
+        const docsResponse = await fetch(docsUrl);
+        console.log("[WorkflowStepper] Documents response status:", docsResponse.status);
+        if (docsResponse.ok) {
+          const docs = await docsResponse.json();
+          console.log("[WorkflowStepper] Documents loaded:", docs);
+          setUploadedDocuments(docs);
+        } else {
+          console.error("[WorkflowStepper] Failed to load documents:", await docsResponse.text());
+        }
 
         // Initialize form data with existing values or defaults
         const initialData: Record<string, any> = {};
@@ -474,6 +492,31 @@ export function WorkflowStepper({
                   />
                 );
               })}
+            </div>
+          )}
+
+          {/* Required Documents Section */}
+          {currentStep.document_types && currentStep.document_types.length > 0 && (
+            <div className="border-t border-brand-dark-border pt-6">
+              <StepDocuments
+                dossierId={dossierId}
+                stepInstanceId={currentStepInstance?.id || ""}
+                requiredDocuments={currentStep.document_types}
+                uploadedDocuments={uploadedDocuments}
+                onDocumentUploaded={async () => {
+                  // Reload documents after upload
+                  const stepInstanceId = currentStepInstance?.id;
+                  const docsUrl = stepInstanceId
+                    ? `/api/workflow/dossier-documents?dossier_id=${dossierId}&step_instance_id=${stepInstanceId}`
+                    : `/api/workflow/dossier-documents?dossier_id=${dossierId}`;
+
+                  const docsResponse = await fetch(docsUrl);
+                  if (docsResponse.ok) {
+                    const docs = await docsResponse.json();
+                    setUploadedDocuments(docs);
+                  }
+                }}
+              />
             </div>
           )}
 

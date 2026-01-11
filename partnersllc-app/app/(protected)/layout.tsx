@@ -1,23 +1,20 @@
-import { requireAuth } from "@/lib/auth";
-import { getUserRole } from "@/lib/user-role";
-import {
-  clientNavConfig,
-  adminNavConfig,
-} from "@/lib/navigation-config";
+import { requireAuthWithProfile } from "@/lib/auth";
+import { getNavConfigForRole } from "@/lib/navigation-config";
 import { SidebarProvider } from "@/components/sidebar/SidebarProvider";
+import { Toaster } from "sonner";
 
 export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireAuth();
-  const role = await getUserRole(user.id);
-  const navConfig = role === "admin" ? adminNavConfig : clientNavConfig;
+  const profile = await requireAuthWithProfile();
+  const navConfig = getNavConfigForRole(profile.role);
 
   return (
-    <SidebarProvider role={role} navConfig={navConfig}>
+    <SidebarProvider role={profile.role} navConfig={navConfig}>
       {children}
+      <Toaster position="top-right" richColors />
     </SidebarProvider>
   );
 }

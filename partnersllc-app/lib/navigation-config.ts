@@ -68,25 +68,80 @@ export const clientNavConfig: NavConfig = {
   ],
 };
 
+export const agentNavConfig: NavConfig = {
+  sections: [
+    {
+      label: "Menu",
+      items: [
+        {
+          href: "/agent",
+          icon: "fa-chart-pie",
+          label: "Tableau de bord",
+        },
+        {
+          href: "/agent/queue",
+          icon: "fa-list-check",
+          label: "File d'attente",
+        },
+        {
+          href: "/agent/dossiers",
+          icon: "fa-folder-tree",
+          label: "Dossiers",
+        },
+        {
+          href: "/agent/documents",
+          icon: "fa-file-check",
+          label: "Documents à réviser",
+        },
+      ],
+    },
+    {
+      label: "Support",
+      items: [
+        {
+          href: "/agent/profile",
+          icon: "fa-gear",
+          label: "Paramètres",
+        },
+      ],
+    },
+  ],
+};
+
 export const adminNavConfig: NavConfig = {
   sections: [
     {
       label: "Menu",
       items: [
         {
-          href: "/admin",
+          href: "/admin/dashboard",
           icon: "fa-chart-pie",
           label: "Vue d'ensemble",
-        },
-        {
-          href: "/admin/clients",
-          icon: "fa-users-gear",
-          label: "Gestion Clients",
         },
         {
           href: "/admin/dossiers",
           icon: "fa-folder-tree",
           label: "Dossiers LLC",
+        },
+        {
+          href: "/admin/clients",
+          icon: "fa-users",
+          label: "Gestion Clients",
+        },
+        {
+          href: "/admin/products",
+          icon: "fa-box",
+          label: "Produits",
+        },
+        {
+          href: "/admin/payment-links",
+          icon: "fa-link",
+          label: "Liens de paiement",
+        },
+        {
+          href: "/admin/analytics",
+          icon: "fa-chart-line",
+          label: "Analyses",
         },
         {
           href: "/admin/facturation",
@@ -117,3 +172,20 @@ export const adminNavConfig: NavConfig = {
     },
   ],
 };
+
+/**
+ * Get navigation config based on user role
+ */
+export function getNavConfigForRole(
+  role: "CLIENT" | "AGENT" | "ADMIN"
+): NavConfig {
+  switch (role) {
+    case "ADMIN":
+      return adminNavConfig;
+    case "AGENT":
+      return agentNavConfig;
+    case "CLIENT":
+    default:
+      return clientNavConfig;
+  }
+}

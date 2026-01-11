@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { UserRole } from "@/types/auth";
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -34,11 +35,15 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /dashboard and /admin routes
-  if (
-    request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/admin")
-  ) {
+  const pathname = request.nextUrl.pathname;
+
+  // Protect /dashboard, /admin, and /agent routes
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/agent");
+
+  if (isProtectedRoute) {
     if (!user) {
       // Redirect to login if not authenticated
       const url = request.nextUrl.clone();
@@ -46,25 +51,71 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Fetch user profile status for dashboard routes
-    if (request.nextUrl.pathname.startsWith("/dashboard")) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("status")
-        .eq("id", user.id)
-        .single();
+    // Fetch user profile with role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, status")
+      .eq("id", user.id)
+      .single();
 
-      if (profile) {
-        // Store status in request header for use in page components
-        supabaseResponse.headers.set("x-user-status", profile.status);
+    const role: UserRole = profile?.role || "CLIENT";
+
+    // Role-based access control
+    if (pathname.startsWith("/admin")) {
+      // Only ADMIN can access /admin routes
+      if (role !== "ADMIN") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/unauthorized";
+        return NextResponse.redirect(url);
       }
+    } else if (pathname.startsWith("/agent")) {
+      // AGENT and ADMIN can access /agent routes
+      if (role !== "AGENT" && role !== "ADMIN") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/unauthorized";
+        return NextResponse.redirect(url);
+      }
+    } else if (pathname.startsWith("/dashboard")) {
+      // CLIENT and ADMIN can access /dashboard routes
+      // AGENTs should use /agent workspace instead
+      if (role === "AGENT") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/agent";
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // Store role and status in headers for use in page components
+    if (profile) {
+      supabaseResponse.headers.set("x-user-role", profile.role);
+      supabaseResponse.headers.set("x-user-status", profile.status);
     }
   }
 
   // Redirect authenticated users away from /login and /register
-  if ((request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/register") && user) {
+  if (
+    (pathname === "/login" || pathname === "/register") &&
+    user
+  ) {
+    // Fetch role to redirect to appropriate workspace
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const role: UserRole = profile?.role || "CLIENT";
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+
+    // Redirect based on role
+    if (role === "ADMIN") {
+      url.pathname = "/admin";
+    } else if (role === "AGENT") {
+      url.pathname = "/agent";
+    } else {
+      url.pathname = "/dashboard";
+    }
+
     return NextResponse.redirect(url);
   }
 

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth";
-import { getUserRole } from "@/lib/user-role";
+import { requireAdminAuth } from "@/lib/auth";
 import {
   getAgentStats,
   getAgentActivityEvents,
@@ -9,26 +8,10 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
-    const role = await getUserRole(user.id);
-
-    if (role !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
+    const user = await requireAdminAuth();
 
     const searchParams = request.nextUrl.searchParams;
     const agentId = searchParams.get("agentId") || user.id;
-
-    // Verify agentId matches current user or has permission
-    if (agentId !== user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
 
     const [stats, activities, dossiers] = await Promise.all([
       getAgentStats(agentId),

@@ -9,6 +9,15 @@ export interface Step {
   position: number;
 }
 
+export interface DocumentType {
+  id: string;
+  code: string;
+  label: string;
+  description: string | null;
+  max_file_size_mb: number;
+  allowed_extensions: string[];
+}
+
 export interface ProductStep {
   id: string;
   product_id: string;
@@ -17,6 +26,7 @@ export interface ProductStep {
   is_required: boolean;
   estimated_duration_hours: number | null;
   step: Step;
+  document_types: DocumentType[];
 }
 
 export interface ProductWithSteps {
@@ -28,7 +38,7 @@ export interface ProductWithSteps {
 }
 
 /**
- * Get all steps for a product with their details
+ * Get all steps for a product with their details and required documents
  */
 export async function getProductSteps(
   productId: string
@@ -69,26 +79,59 @@ export async function getProductSteps(
     firstItem: productSteps?.[0] || null,
   });
 
-  const mapped = (productSteps || []).map((ps) => {
-    const mappedItem = {
-      id: ps.id,
-      product_id: ps.product_id,
-      step_id: ps.step_id,
-      position: ps.position,
-      is_required: ps.is_required,
-      estimated_duration_hours: ps.estimated_duration_hours,
-      step: ps.step as Step,
-    };
-    
-    if (!mappedItem.step) {
-      console.warn(`[getProductSteps] Product step ${ps.id} has no step data:`, ps);
-    }
-    
-    return mappedItem;
-  });
+  // For each product step, fetch its required document types
+  const stepsWithDocuments = await Promise.all(
+    (productSteps || []).map(async (ps) => {
+      // Fetch document types for this product step
+      const { data: stepDocTypes, error: docTypesError } = await supabase
+        .from("step_document_types")
+        .select(
+          `
+          document_type:document_types (
+            id,
+            code,
+            label,
+            description,
+            max_file_size_mb,
+            allowed_extensions
+          )
+        `
+        )
+        .eq("product_step_id", ps.id);
 
-  console.log(`[getProductSteps] Mapped ${mapped.length} product steps`);
-  return mapped;
+      console.log(`[getProductSteps] Document types for product_step ${ps.id}:`, {
+        count: stepDocTypes?.length || 0,
+        error: docTypesError,
+        stepDocTypes
+      });
+
+      const documentTypes = (stepDocTypes || [])
+        .map((sdt: any) => sdt.document_type)
+        .filter((dt: any) => dt !== null) as DocumentType[];
+
+      console.log(`[getProductSteps] Filtered document types for product_step ${ps.id}:`, documentTypes);
+
+      const mappedItem: ProductStep = {
+        id: ps.id,
+        product_id: ps.product_id,
+        step_id: ps.step_id,
+        position: ps.position,
+        is_required: ps.is_required,
+        estimated_duration_hours: ps.estimated_duration_hours,
+        step: ps.step as Step,
+        document_types: documentTypes,
+      };
+
+      if (!mappedItem.step) {
+        console.warn(`[getProductSteps] Product step ${ps.id} has no step data:`, ps);
+      }
+
+      return mappedItem;
+    })
+  );
+
+  console.log(`[getProductSteps] Mapped ${stepsWithDocuments.length} product steps with documents`);
+  return stepsWithDocuments;
 }
 
 /**

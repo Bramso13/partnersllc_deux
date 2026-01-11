@@ -14,15 +14,26 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@hookform/resolvers": "^5.2.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.90.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.0.0",
+    "lucide-react": "^0.562.0",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.70.0",
+    "recharts": "^3.6.0",
+    "sonner": "^2.0.7",
     "stripe": "^20.1.2",
+    "tailwind-merge": "^3.4.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {

@@ -18,6 +18,9 @@ const STATUS_LABELS: Record<DossierStatus | "all", string> = {
   BANK_PREPARATION: "Préparation bancaire",
   BANK_OPENED: "Compte ouvert",
   WAITING_48H: "Attente 48h",
+  IN_PROGRESS: "En cours",
+  UNDER_REVIEW: "En révision",
+  COMPLETED: "Terminé",
   CLOSED: "Fermé",
   ERROR: "Erreur",
 };
@@ -32,6 +35,9 @@ const STATUS_OPTIONS: (DossierStatus | "all")[] = [
   "BANK_PREPARATION",
   "BANK_OPENED",
   "WAITING_48H",
+  "IN_PROGRESS",
+  "UNDER_REVIEW",
+  "COMPLETED",
   "CLOSED",
   "ERROR",
 ];

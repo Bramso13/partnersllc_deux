@@ -1,12 +1,12 @@
 import Link from "next/link";
-import type { UserRole } from "@/lib/user-role";
+import type { UserRole } from "@/types/auth";
 
 interface SidebarFooterProps {
   role: UserRole;
 }
 
 export function SidebarFooter({ role }: SidebarFooterProps) {
-  if (role === "admin") {
+  if (role === "ADMIN" || role === "AGENT") {
     return (
       <div className="bg-[#2D3033] rounded-xl p-4 text-center">
         <div className="text-sm text-[#B7B7B7]">© 2025 PARTNERS LLC</div>
