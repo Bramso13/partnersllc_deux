@@ -12,6 +12,13 @@ import { RejectionWarningBanner } from "@/components/dashboard/RejectionWarningB
 import Link from "next/link";
 import { useState, useEffect, useMemo, useRef } from "react";
 
+interface AdvisorInfo {
+  id: string | null;
+  name: string;
+  email: string;
+  role: string;
+}
+
 interface DossierDetailContentProps {
   dossier: DossierWithDetails;
   productSteps: ProductStep[];
@@ -44,6 +51,7 @@ export function DossierDetailContent({
   const [rejectedStepId, setRejectedStepId] = useState<string | undefined>();
   const [isLoadingRejections, setIsLoadingRejections] = useState(false);
   const lastFetchedStepIdsRef = useRef<string>("");
+  const [advisor, setAdvisor] = useState<AdvisorInfo | undefined>(undefined);
 
   useEffect(() => {
     // Skip if we've already fetched for these step IDs
@@ -101,6 +109,23 @@ export function DossierDetailContent({
     fetchRejectedFields();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rejectedStepIds, dossier.id]);
+
+  // Fetch advisor information
+  useEffect(() => {
+    const fetchAdvisor = async () => {
+      try {
+        const response = await fetch(`/api/dossiers/${dossier.id}/advisor`);
+        if (response.ok) {
+          const advisorData = await response.json();
+          setAdvisor(advisorData);
+        }
+      } catch (error) {
+        console.error("Error fetching advisor:", error);
+      }
+    };
+
+    fetchAdvisor();
+  }, [dossier.id]);
 
   // If step_id is in URL, show workflow
   if (stepIdFromUrl && dossier.product_id) {
@@ -175,7 +200,10 @@ export function DossierDetailContent({
       {/* Progress Overview Section */}
       <div id="progress-overview" className="grid grid-cols-12 gap-6 mb-8">
         <ProgressCard dossier={dossier} productSteps={productSteps} />
-        <SidebarCards estimatedCompletion={estimatedCompletion || undefined} />
+        <SidebarCards
+          estimatedCompletion={estimatedCompletion || undefined}
+          advisor={advisor}
+        />
       </div>
 
       {/* Main Grid Section */}

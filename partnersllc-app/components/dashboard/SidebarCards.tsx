@@ -1,17 +1,20 @@
 "use client";
 
+interface AdvisorInfo {
+  id: string | null;
+  name: string;
+  email: string;
+  role: string;
+}
+
 interface SidebarCardsProps {
   estimatedCompletion?: string;
-  advisorName?: string;
-  advisorRole?: string;
-  advisorAvatar?: string;
+  advisor?: AdvisorInfo;
 }
 
 export function SidebarCards({
   estimatedCompletion,
-  advisorName,
-  advisorRole,
-  advisorAvatar,
+  advisor,
 }: SidebarCardsProps) {
   // Calculate days until completion
   const daysUntilCompletion = estimatedCompletion
@@ -30,19 +33,16 @@ export function SidebarCards({
         </h4>
         <div className="flex items-center space-x-3">
           <img
-            src={
-              advisorAvatar ||
-              "https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg"
-            }
+            src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg"
             alt="Advisor"
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>
             <p className="font-medium text-brand-text-primary">
-              {advisorName || "Sophie Martin"}
+              {advisor?.name || "Sophie Martin"}
             </p>
             <p className="text-xs text-brand-text-secondary">
-              {advisorRole || "Spécialiste LLC"}
+              {advisor?.role || "Spécialiste LLC"}
             </p>
           </div>
         </div>

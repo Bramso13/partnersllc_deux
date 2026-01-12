@@ -1,6 +1,6 @@
 import { requireAuth } from "@/lib/auth";
 import { getProfile } from "@/lib/profile";
-import { getUserDossiers } from "@/lib/dossiers";
+import { getUserDossiers, getDossierAdvisor } from "@/lib/dossiers";
 import { getProductSteps, ProductStep } from "@/lib/workflow";
 import { Metadata } from "next";
 import { Suspense } from "react";
@@ -139,6 +139,9 @@ async function DashboardContent({ user }: { user: { id: string } }) {
       ? null
       : new Date(new Date().getTime() + 8 * 24 * 60 * 60 * 1000).toISOString();
 
+    // Get advisor information
+    const advisor = await getDossierAdvisor(mainDossier.id);
+
     return (
       <>
         {/* Link to dossier detail page */}
@@ -157,6 +160,7 @@ async function DashboardContent({ user }: { user: { id: string } }) {
           <ProgressCard dossier={mainDossier} productSteps={productSteps} />
           <SidebarCards
             estimatedCompletion={estimatedCompletion || undefined}
+            advisor={advisor}
           />
         </div>
 
