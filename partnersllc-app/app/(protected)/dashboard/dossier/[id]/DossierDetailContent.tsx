@@ -10,7 +10,7 @@ import { DocumentsSection } from "@/components/dashboard/DocumentsSection";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { RejectionWarningBanner } from "@/components/dashboard/RejectionWarningBanner";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 interface DossierDetailContentProps {
   dossier: DossierWithDetails;
@@ -26,20 +26,34 @@ export function DossierDetailContent({
   const searchParams = useSearchParams();
   const stepIdFromUrl = searchParams.get("step_id") || initialStepId;
 
-  // Check for rejected steps and count rejected fields
-  const rejectedSteps =
-    dossier.step_instances?.filter(
-      (si: any) => si.validation_status === "REJECTED"
-    ) || [];
+  // Check for rejected steps and count rejected fields - memoize to prevent infinite loops
+  const rejectedSteps = useMemo(() => {
+    return (
+      dossier.step_instances?.filter(
+        (si: any) => si.validation_status === "REJECTED"
+      ) || []
+    );
+  }, [dossier.step_instances]);
+
+  // Create a stable string representation of rejected step IDs for dependency tracking
+  const rejectedStepIds = useMemo(() => {
+    return rejectedSteps.map((s: any) => s.step_id).join(",");
+  }, [rejectedSteps]);
 
   const [rejectedFieldsCount, setRejectedFieldsCount] = useState(0);
   const [rejectedStepId, setRejectedStepId] = useState<string | undefined>();
   const [isLoadingRejections, setIsLoadingRejections] = useState(false);
+  const lastFetchedStepIdsRef = useRef<string>("");
 
   useEffect(() => {
-    const fetchRejectedFields = async () => {
-      if (rejectedSteps.length === 0) return;
+    // Skip if we've already fetched for these step IDs
+    if (lastFetchedStepIdsRef.current === rejectedStepIds) return;
+    if (rejectedSteps.length === 0) return;
 
+    // Mark as being fetched
+    lastFetchedStepIdsRef.current = rejectedStepIds;
+
+    const fetchRejectedFields = async () => {
       setIsLoadingRejections(true);
       try {
         let totalRejectedFields = 0;
@@ -76,6 +90,8 @@ export function DossierDetailContent({
         setRejectedFieldsCount(totalRejectedFields);
         setRejectedStepId(firstRejectedStepId);
       } catch (error) {
+        // Reset ref on error so we can retry
+        lastFetchedStepIdsRef.current = "";
         console.error("Error fetching rejected fields:", error);
       } finally {
         setIsLoadingRejections(false);
@@ -83,7 +99,8 @@ export function DossierDetailContent({
     };
 
     fetchRejectedFields();
-  }, [rejectedSteps, dossier.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rejectedStepIds, dossier.id]);
 
   // If step_id is in URL, show workflow
   if (stepIdFromUrl && dossier.product_id) {
@@ -91,7 +108,7 @@ export function DossierDetailContent({
       <div>
         {/* Back button */}
         <Link
-          href={`/dossier/${dossier.id}`}
+          href={`/dashboard/dossier/${dossier.id}`}
           className="inline-flex items-center gap-2 text-brand-text-secondary hover:text-brand-text-primary mb-6 transition-colors"
         >
           <i className="fa-solid fa-arrow-left"></i>
@@ -125,7 +142,7 @@ export function DossierDetailContent({
   // Otherwise, show dossier detail with all steps
   const estimatedCompletion = dossier.completed_at
     ? null
-    : new Date(new Date().getTime() + 8 * 24 * 60 * 60 * 1000).toISOString();
+    : new Date(new Date(dossier.created_at).getTime() + 48 * 60 * 60 * 1000).toISOString();
 
   return (
     <div>

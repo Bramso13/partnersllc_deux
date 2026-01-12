@@ -32,7 +32,7 @@ export function ProgressCard({
 
   const handleStartStep = (stepId: string) => {
     // Navigate to dossier detail page with step_id parameter to open workflow on that step
-    router.push(`/dossier/${dossier.id}?step_id=${stepId}`);
+    router.push(`/dashboard/dossier/${dossier.id}?step_id=${stepId}`);
   };
 
   return (
@@ -233,8 +233,8 @@ function getSteps(dossier: DossierWithDetails, productSteps: ProductStep[]) {
       const stepInstance = stepInstanceMap.get(productStep.step_id);
       const validationStatus = (stepInstance as any)?.validation_status;
 
-      // Check if previous steps are approved
-      const canStart = checkPreviousStepsApproved(
+      // Check if previous step has been submitted
+      const canStart = checkPreviousStepSubmitted(
         productSteps,
         stepInstanceMap,
         index
@@ -335,6 +335,34 @@ function getSteps(dossier: DossierWithDetails, productSteps: ProductStep[]) {
         };
       }
     });
+}
+
+function checkPreviousStepSubmitted(
+  productSteps: ProductStep[],
+  stepInstanceMap: Map<string, any>,
+  currentIndex: number
+): boolean {
+  // First step can always be started
+  if (currentIndex === 0) {
+    return true;
+  }
+
+  // Check if the previous step (immediately before) has been submitted
+  const prevIndex = currentIndex - 1;
+  const prevProductStep = productSteps[prevIndex];
+  const prevStepInstance = stepInstanceMap.get(prevProductStep.step_id);
+
+  // Previous step must exist and have been submitted (not in DRAFT state)
+  if (!prevStepInstance) {
+    // Previous step not started
+    return false;
+  }
+
+  const prevValidationStatus = prevStepInstance.validation_status;
+
+  // Step is considered submitted if it has a validation_status that is not DRAFT or null
+  // This includes: SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED
+  return prevValidationStatus !== null && prevValidationStatus !== "DRAFT";
 }
 
 function checkPreviousStepsApproved(

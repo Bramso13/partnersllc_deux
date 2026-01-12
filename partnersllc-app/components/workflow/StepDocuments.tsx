@@ -33,16 +33,13 @@ export function StepDocuments({
     requiredDocumentsCount: requiredDocuments?.length || 0,
     uploadedDocumentsCount: uploadedDocuments?.length || 0,
     requiredDocuments,
-    uploadedDocuments
+    uploadedDocuments,
   });
 
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleFileUpload = async (
-    documentType: DocumentType,
-    file: File
-  ) => {
+  const handleFileUpload = async (documentType: DocumentType, file: File) => {
     setUploading(documentType.id);
     setUploadError(null);
 
@@ -84,12 +81,14 @@ export function StepDocuments({
         throw new Error(errorData.error || "Failed to upload document");
       }
 
-      // Refresh documents list
+      const result = await response.json();
+      console.log("[StepDocuments] Upload successful:", result);
+
+      // Wait a bit to ensure database is updated, then refresh documents list
+      await new Promise((resolve) => setTimeout(resolve, 500));
       onDocumentUploaded();
     } catch (error) {
-      setUploadError(
-        error instanceof Error ? error.message : "Upload failed"
-      );
+      setUploadError(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setUploading(null);
     }
@@ -191,7 +190,7 @@ export function StepDocuments({
                     </div>
                   ) : (
                     <label className="px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-brand-accent/90 transition-colors cursor-pointer text-sm font-medium inline-block">
-                      {uploadedDoc ? "Replace" : "Upload"}
+                      {uploadedDoc ? "Remplacer" : "Téléverser"}
                       <input
                         type="file"
                         accept={docType.allowed_extensions

@@ -7,12 +7,12 @@ import type { UserProfile } from "@/types/user";
  */
 export async function getProfile(
   userId: string
-): Promise<UserProfile | null> {
+): Promise<(UserProfile & { role?: "CLIENT" | "AGENT" | "ADMIN" }) | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select("id, full_name, phone, status, role, stripe_customer_id, created_at, updated_at")
     .eq("id", userId)
     .single();
 
@@ -20,5 +20,5 @@ export async function getProfile(
     return null;
   }
 
-  return data as UserProfile;
+  return data as UserProfile & { role?: "CLIENT" | "AGENT" | "ADMIN" };
 }

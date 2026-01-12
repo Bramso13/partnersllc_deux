@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { DashboardMetrics } from "@/types/analytics";
 
 /**
@@ -12,7 +12,7 @@ export async function getDashboardMetrics(filters?: {
   productId?: string;
   agentId?: string;
 }): Promise<DashboardMetrics> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Helper to apply filters to a query
   const applyFilters = (query: any, table: string = "") => {
@@ -29,7 +29,11 @@ export async function getDashboardMetrics(filters?: {
     "orders"
   ).eq("status", "PAID");
 
-  const totalRevenue = (totalRevData || []).reduce((sum: number, o: { amount: number }) => sum + (o.amount || 0), 0) / 100;
+  const totalRevenue =
+    (totalRevData || []).reduce(
+      (sum: number, o: { amount: number }) => sum + (o.amount || 0),
+      0
+    ) / 100;
 
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
@@ -41,14 +45,21 @@ export async function getDashboardMetrics(filters?: {
     .eq("status", "PAID")
     .gte("created_at", startOfMonth.toISOString());
 
-  const revenueThisMonth = (monthRevData || []).reduce((sum: number, o: { amount: number }) => sum + (o.amount || 0), 0) / 100;
+  const revenueThisMonth =
+    (monthRevData || []).reduce(
+      (sum: number, o: { amount: number }) => sum + (o.amount || 0),
+      0
+    ) / 100;
 
-  const avgOrderValue = totalRevData && totalRevData.length > 0 
-    ? totalRevenue / totalRevData.length 
-    : 0;
+  const avgOrderValue =
+    totalRevData && totalRevData.length > 0
+      ? totalRevenue / totalRevData.length
+      : 0;
 
   // Revenue Trend (Daily last 90 days if no range)
-  const trendStartDate = filters?.startDate || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const trendStartDate =
+    filters?.startDate ||
+    new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
   const { data: trendData } = await supabase
     .from("orders")
     .select("amount, created_at")
@@ -57,10 +68,12 @@ export async function getDashboardMetrics(filters?: {
 
   const dailyTrend: Record<string, number> = {};
   (trendData || []).forEach((o: { amount: number; created_at: string }) => {
-    const date = new Date(o.created_at).toISOString().split('T')[0];
-    dailyTrend[date] = (dailyTrend[date] || 0) + (o.amount / 100);
+    const date = new Date(o.created_at).toISOString().split("T")[0];
+    dailyTrend[date] = (dailyTrend[date] || 0) + o.amount / 100;
   });
-  const revenueTrend = Object.entries(dailyTrend).map(([date, revenue]) => ({ date, revenue })).sort((a, b) => a.date.localeCompare(b.date));
+  const revenueTrend = Object.entries(dailyTrend)
+    .map(([date, revenue]) => ({ date, revenue }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   // Revenue by Product
   const { data: revByProdData } = await applyFilters(
@@ -71,25 +84,37 @@ export async function getDashboardMetrics(filters?: {
   const prodRevenue: Record<string, number> = {};
   (revByProdData || []).forEach((o: any) => {
     const name = o.products?.name || "Unknown";
-    prodRevenue[name] = (prodRevenue[name] || 0) + (o.amount / 100);
+    prodRevenue[name] = (prodRevenue[name] || 0) + o.amount / 100;
   });
-  const revenueByProduct = Object.entries(prodRevenue).map(([name, revenue]) => ({ name, revenue }));
+  const revenueByProduct = Object.entries(prodRevenue).map(
+    ([name, revenue]) => ({ name, revenue })
+  );
 
   // 2. Conversion Metrics
-  const { count: totalLinks } = await applyFilters(supabase.from("payment_links").select("*", { count: "exact", head: true }));
+  const { count: totalLinks } = await applyFilters(
+    supabase.from("payment_links").select("*", { count: "exact", head: true })
+  );
   const { count: convertedLinks } = await applyFilters(
     supabase.from("orders").select("*", { count: "exact", head: true })
-  ).not("payment_link_id", "is", null).eq("status", "PAID");
+  )
+    .not("payment_link_id", "is", null)
+    .eq("status", "PAID");
 
-  const paymentLinkConversionRate = totalLinks ? ((convertedLinks || 0) / totalLinks) * 100 : 0;
+  const paymentLinkConversionRate = totalLinks
+    ? ((convertedLinks || 0) / totalLinks) * 100
+    : 0;
 
   // Registration to payment
-  const { count: totalProfiles } = await applyFilters(supabase.from("profiles").select("*", { count: "exact", head: true }));
+  const { count: totalProfiles } = await applyFilters(
+    supabase.from("profiles").select("*", { count: "exact", head: true })
+  );
   const { count: paidProfiles } = await applyFilters(
     supabase.from("profiles").select("*", { count: "exact", head: true })
   ).eq("status", "ACTIVE");
 
-  const registration_to_payment_rate = totalProfiles ? ((paidProfiles || 0) / totalProfiles) * 100 : 0;
+  const registration_to_payment_rate = totalProfiles
+    ? ((paidProfiles || 0) / totalProfiles) * 100
+    : 0;
 
   // Funnel
   const funnelData = [
@@ -100,10 +125,14 @@ export async function getDashboardMetrics(filters?: {
   ];
 
   // 3. Dossier Performance
-  const { count: totalDossiers } = await applyFilters(supabase.from("dossiers").select("*", { count: "exact", head: true }));
+  const { count: totalDossiers } = await applyFilters(
+    supabase.from("dossiers").select("*", { count: "exact", head: true })
+  );
   const { count: activeDossiers } = await applyFilters(
     supabase.from("dossiers").select("*", { count: "exact", head: true })
-  ).neq("status", "COMPLETED").neq("status", "CLOSED");
+  )
+    .neq("status", "COMPLETED")
+    .neq("status", "CLOSED");
 
   const { count: completedThisMonth } = await supabase
     .from("dossiers")
@@ -113,17 +142,23 @@ export async function getDashboardMetrics(filters?: {
 
   const { data: completedDossiers } = await applyFilters(
     supabase.from("dossiers").select("created_at, completed_at")
-  ).eq("status", "COMPLETED").not("completed_at", "is", null);
+  )
+    .eq("status", "COMPLETED")
+    .not("completed_at", "is", null);
 
-  const totalDays = (completedDossiers || []).reduce((sum: number, d: { created_at: string; completed_at: string }) => {
-    const start = new Date(d.created_at);
-    const end = new Date(d.completed_at);
-    return sum + (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
-  }, 0);
+  const totalDays = (completedDossiers || []).reduce(
+    (sum: number, d: { created_at: string; completed_at: string }) => {
+      const start = new Date(d.created_at);
+      const end = new Date(d.completed_at);
+      return sum + (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+    },
+    0
+  );
 
-  const avgDaysToCompletion = completedDossiers && completedDossiers.length > 0 
-    ? totalDays / completedDossiers.length 
-    : 0;
+  const avgDaysToCompletion =
+    completedDossiers && completedDossiers.length > 0
+      ? totalDays / completedDossiers.length
+      : 0;
 
   // Completion rate by product
   const { data: dossiersByProd } = await applyFilters(
@@ -139,25 +174,33 @@ export async function getDashboardMetrics(filters?: {
     if (d.status === "COMPLETED") prodStats[name].completed++;
   });
 
-  const completion_rate_by_product = Object.entries(prodStats).map(([name, s]) => ({
-    name,
-    rate: (s.completed / s.total) * 100
-  }));
+  const completion_rate_by_product = Object.entries(prodStats).map(
+    ([name, s]) => ({
+      name,
+      rate: (s.completed / s.total) * 100,
+    })
+  );
 
   // Bottlenecks
   const { data: stepsData } = await applyFilters(
-    supabase.from("step_instances").select("started_at, completed_at, steps(label)"),
+    supabase
+      .from("step_instances")
+      .select("started_at, completed_at, steps(label)"),
     "step_instances"
-  ).not("completed_at", "is", null).not("started_at", "is", null);
+  )
+    .not("completed_at", "is", null)
+    .not("started_at", "is", null);
 
-  const stepDurations: Record<string, { totalHours: number; count: number }> = {};
+  const stepDurations: Record<string, { totalHours: number; count: number }> =
+    {};
   (stepsData || []).forEach((s: any) => {
     const label = s.steps?.label || "Étape Inconnue";
     const start = new Date(s.started_at);
     const end = new Date(s.completed_at);
     const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-    
-    if (!stepDurations[label]) stepDurations[label] = { totalHours: 0, count: 0 };
+
+    if (!stepDurations[label])
+      stepDurations[label] = { totalHours: 0, count: 0 };
     stepDurations[label].totalHours += hours;
     stepDurations[label].count++;
   });
@@ -169,31 +212,45 @@ export async function getDashboardMetrics(filters?: {
 
   // 4. Agent Performance
   const { data: reviewsData } = await applyFilters(
-    supabase.from("document_reviews").select("reviewer_id, reviewed_at, agents(name)"),
+    supabase
+      .from("document_reviews")
+      .select("reviewer_id, reviewed_at, agents(name)"),
     "document_reviews"
   );
 
   const agentStats: Record<string, { count: number; name: string }> = {};
   (reviewsData || []).forEach((r: any) => {
     const id = r.reviewer_id;
-    if (!agentStats[id]) agentStats[id] = { count: 0, name: r.agents?.name || "Agent Inconnu" };
+    if (!agentStats[id])
+      agentStats[id] = { count: 0, name: r.agents?.name || "Agent Inconnu" };
     agentStats[id].count++;
   });
 
-  const workloadDistribution = Object.values(agentStats).map(s => ({ agent_name: s.name, count: s.count }));
+  const workloadDistribution = Object.values(agentStats).map((s) => ({
+    agent_name: s.name,
+    count: s.count,
+  }));
 
   // Leaderboard
   const leaderboard = Object.values(agentStats)
-    .map(s => ({ agent_name: s.name, reviews: s.count, avg_time: 0 }))
+    .map((s) => ({ agent_name: s.name, reviews: s.count, avg_time: 0 }))
     .sort((a, b) => b.reviews - a.reviews);
 
   // 5. Document Metrics
-  const { count: totalReviews } = await applyFilters(supabase.from("document_reviews").select("*", { count: "exact", head: true }));
+  const { count: totalReviews } = await applyFilters(
+    supabase
+      .from("document_reviews")
+      .select("*", { count: "exact", head: true })
+  );
   const { count: approvedReviews } = await applyFilters(
-    supabase.from("document_reviews").select("*", { count: "exact", head: true })
+    supabase
+      .from("document_reviews")
+      .select("*", { count: "exact", head: true })
   ).eq("status", "APPROVED");
 
-  const approvalRate = totalReviews ? ((approvedReviews || 0) / totalReviews) * 100 : 0;
+  const approvalRate = totalReviews
+    ? ((approvedReviews || 0) / totalReviews) * 100
+    : 0;
 
   const { data: rejections } = await applyFilters(
     supabase.from("document_reviews").select("reason")
@@ -201,7 +258,8 @@ export async function getDashboardMetrics(filters?: {
 
   const rejectionCounts: Record<string, number> = {};
   (rejections || []).forEach((r: { reason: string | null }) => {
-    if (r.reason) rejectionCounts[r.reason] = (rejectionCounts[r.reason] || 0) + 1;
+    if (r.reason)
+      rejectionCounts[r.reason] = (rejectionCounts[r.reason] || 0) + 1;
   });
 
   const rejection_reasons = Object.entries(rejectionCounts)
@@ -214,13 +272,13 @@ export async function getDashboardMetrics(filters?: {
       revenue_this_month: revenueThisMonth,
       avg_order_value: avgOrderValue,
       revenue_trend: revenueTrend,
-      revenue_by_product: revenueByProduct
+      revenue_by_product: revenueByProduct,
     },
     conversion: {
       payment_link_conversion_rate: paymentLinkConversionRate,
       registration_to_payment_rate: registration_to_payment_rate,
       suspended_recovery_rate: 0,
-      funnel_data: funnelData
+      funnel_data: funnelData,
     },
     dossier: {
       total_dossiers: totalDossiers || 0,
@@ -228,19 +286,19 @@ export async function getDashboardMetrics(filters?: {
       completed_this_month: completedThisMonth || 0,
       avg_days_to_completion: avgDaysToCompletion,
       completion_rate_by_product,
-      bottlenecks
+      bottlenecks,
     },
     agent: {
       documents_reviewed: totalReviews || 0,
       avg_review_time_hours: 0,
       workload_distribution: workloadDistribution,
-      leaderboard
+      leaderboard,
     },
     document: {
       approval_rate: approvalRate,
       rejection_reasons,
-      avg_versions_per_document: 0
-    }
+      avg_versions_per_document: 0,
+    },
   };
 
   // If no data, return mock data for preview
@@ -257,8 +315,8 @@ function getMockMetrics(): DashboardMetrics {
     const d = new Date();
     d.setDate(now.getDate() - (29 - i));
     return {
-      date: d.toISOString().split('T')[0],
-      revenue: Math.floor(Math.random() * 500) + 100
+      date: d.toISOString().split("T")[0],
+      revenue: Math.floor(Math.random() * 500) + 100,
     };
   });
 
@@ -271,8 +329,8 @@ function getMockMetrics(): DashboardMetrics {
       revenue_by_product: [
         { name: "LLC Formation", revenue: 8500 },
         { name: "Compliance", revenue: 2540 },
-        { name: "Banking", revenue: 1500 }
-      ]
+        { name: "Banking", revenue: 1500 },
+      ],
     },
     conversion: {
       payment_link_conversion_rate: 65.5,
@@ -282,8 +340,8 @@ function getMockMetrics(): DashboardMetrics {
         { name: "Links Créés", value: 100 },
         { name: "Paiements", value: 65 },
         { name: "Inscriptions", value: 60 },
-        { name: "Clients Actifs", value: 42 }
-      ]
+        { name: "Clients Actifs", value: 42 },
+      ],
     },
     dossier: {
       total_dossiers: 154,
@@ -293,13 +351,13 @@ function getMockMetrics(): DashboardMetrics {
       completion_rate_by_product: [
         { name: "LLC Formation", rate: 85 },
         { name: "Compliance", rate: 92 },
-        { name: "Banking", rate: 78 }
+        { name: "Banking", rate: 78 },
       ],
       bottlenecks: [
         { name: "NM Pending", avg_hours: 72 },
         { name: "EIN Pending", avg_hours: 48 },
-        { name: "Under Review", avg_hours: 24 }
-      ]
+        { name: "Under Review", avg_hours: 24 },
+      ],
     },
     agent: {
       documents_reviewed: 450,
@@ -307,13 +365,13 @@ function getMockMetrics(): DashboardMetrics {
       workload_distribution: [
         { agent_name: "Jean Dupont", count: 45 },
         { agent_name: "Marie Curie", count: 38 },
-        { agent_name: "Pierre Martin", count: 32 }
+        { agent_name: "Pierre Martin", count: 32 },
       ],
       leaderboard: [
         { agent_name: "Jean Dupont", reviews: 145, avg_time: 1.8 },
         { agent_name: "Marie Curie", reviews: 132, avg_time: 2.1 },
-        { agent_name: "Pierre Martin", reviews: 98, avg_time: 2.5 }
-      ]
+        { agent_name: "Pierre Martin", reviews: 98, avg_time: 2.5 },
+      ],
     },
     document: {
       approval_rate: 78.4,
@@ -321,9 +379,9 @@ function getMockMetrics(): DashboardMetrics {
         { reason: "Document illisible", count: 45 },
         { reason: "Signature manquante", count: 32 },
         { reason: "Mauvais format", count: 28 },
-        { reason: "Date expirée", count: 15 }
+        { reason: "Date expirée", count: 15 },
       ],
-      avg_versions_per_document: 1.4
-    }
+      avg_versions_per_document: 1.4,
+    },
   };
 }

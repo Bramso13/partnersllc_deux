@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminAuth } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/admin/products/[id]/workflow
@@ -14,7 +14,7 @@ export async function GET(
     await requireAdminAuth();
 
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Fetch product steps with step details
     const { data: productSteps, error: stepsError } = await supabase

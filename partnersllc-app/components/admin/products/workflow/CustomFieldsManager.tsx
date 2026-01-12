@@ -58,33 +58,16 @@ export function CustomFieldsManager({
     }
   };
 
-  const handleAddField = (field: Omit<StepField, "id" | "created_at" | "updated_at">) => {
-    const newField: StepField = {
-      ...field,
-      id: `temp-${Date.now()}`,
-      step_id: stepId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    onUpdate([...customFields, newField]);
+  const handleAddField = (field: StepField) => {
+    onUpdate([...customFields, field]);
     setShowFieldModal(false);
   };
 
-  const handleUpdateField = (
-    field: Omit<StepField, "id" | "created_at" | "updated_at">
-  ) => {
+  const handleUpdateField = (field: StepField) => {
     if (!editingField) return;
 
-    const updatedField: StepField = {
-      ...field,
-      id: editingField.id,
-      step_id: stepId,
-      created_at: editingField.created_at,
-      updated_at: new Date().toISOString(),
-    };
-
     onUpdate(
-      customFields.map((f) => (f.id === editingField.id ? updatedField : f))
+      customFields.map((f) => (f.id === editingField.id ? field : f))
     );
     setEditingField(null);
   };
@@ -134,6 +117,7 @@ export function CustomFieldsManager({
       {/* Field Modal */}
       {showFieldModal && (
         <CustomFieldModal
+          stepId={stepId}
           onSave={handleAddField}
           onClose={() => setShowFieldModal(false)}
         />
@@ -141,6 +125,7 @@ export function CustomFieldsManager({
 
       {editingField && (
         <CustomFieldModal
+          stepId={stepId}
           field={editingField}
           onSave={handleUpdateField}
           onClose={() => setEditingField(null)}

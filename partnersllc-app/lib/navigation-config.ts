@@ -114,7 +114,7 @@ export const adminNavConfig: NavConfig = {
       label: "Menu",
       items: [
         {
-          href: "/admin/dashboard",
+          href: "/admin/analytics",
           icon: "fa-chart-pie",
           label: "Vue d'ensemble",
         },
@@ -137,11 +137,12 @@ export const adminNavConfig: NavConfig = {
           href: "/admin/payment-links",
           icon: "fa-link",
           label: "Liens de paiement",
-        },
-        {
-          href: "/admin/analytics",
-          icon: "fa-chart-line",
-          label: "Analyses",
+          // },
+          // {
+          //   href: "/admin/analytics",
+          //   icon: "fa-chart-line",
+          //   label: "Analyses",
+          // },
         },
         {
           href: "/admin/facturation",
@@ -157,11 +158,6 @@ export const adminNavConfig: NavConfig = {
           href: "/admin/notifications",
           icon: "fa-bullhorn",
           label: "Notifications",
-        },
-        {
-          href: "/admin/rapports",
-          icon: "fa-chart-line",
-          label: "Rapports",
         },
         {
           href: "/admin/settings",

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -126,21 +126,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Update step instance to SUBMITTED status (not completed until admin approves)
-    const { error: instanceUpdateError } = await supabase
+    // Use admin client to bypass RLS
+    const adminClient = createAdminClient();
+    const { data: updatedInstance, error: instanceUpdateError } = await adminClient
       .from("step_instances")
       .update({ 
         validation_status: "SUBMITTED",
         completed_at: null, // Not completed until admin approves
       })
-      .eq("id", stepInstanceId);
+      .eq("id", stepInstanceId)
+      .select("id, validation_status")
+      .single();
 
     if (instanceUpdateError) {
-      console.error("Error updating step instance:", instanceUpdateError);
+      console.error("[SUBMIT STEP] Error updating step instance:", instanceUpdateError);
       throw new Error("Erreur lors de la mise à jour de l'instance");
     }
 
+    console.log("[SUBMIT STEP] Step instance updated:", {
+      stepInstanceId,
+      validation_status: updatedInstance?.validation_status,
+    });
+
     // Update dossier current_step_instance_id
-    const { error: dossierUpdateError } = await supabase
+    // Use admin client to bypass RLS
+    const { error: dossierUpdateError } = await adminClient
       .from("dossiers")
       .update({
         current_step_instance_id: stepInstanceId,
@@ -149,7 +159,7 @@ export async function POST(request: NextRequest) {
       .eq("id", dossier_id);
 
     if (dossierUpdateError) {
-      console.error("Error updating dossier:", dossierUpdateError);
+      console.error("[SUBMIT STEP] Error updating dossier:", dossierUpdateError);
       throw new Error("Erreur lors de la mise à jour du dossier");
     }
 

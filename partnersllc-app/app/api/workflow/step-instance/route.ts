@@ -42,8 +42,24 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error || !stepInstance) {
-      // Step instance doesn't exist yet (DRAFT state)
-      return NextResponse.json(null, { status: 200 });
+      // Step instance doesn't exist yet - create one in DRAFT status
+      const { data: newInstance, error: createError } = await supabase
+        .from("step_instances")
+        .insert({
+          dossier_id: dossierId,
+          step_id: stepId,
+          started_at: new Date().toISOString(),
+          validation_status: "DRAFT",
+        })
+        .select("id, validation_status, rejection_reason")
+        .single();
+
+      if (createError || !newInstance) {
+        console.error("Error creating step instance:", createError);
+        return NextResponse.json(null, { status: 200 });
+      }
+
+      return NextResponse.json(newInstance);
     }
 
     return NextResponse.json(stepInstance);

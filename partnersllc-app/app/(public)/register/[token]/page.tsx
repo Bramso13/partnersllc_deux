@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { notFound, redirect } from "next/navigation";
 import { RegisterPaymentLinkForm } from "./RegisterPaymentLinkForm";
 
 export const metadata: Metadata = {
@@ -21,6 +21,31 @@ export default async function RegisterPaymentLinkPage({
   const { payment } = await searchParams;
 
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+
+  // Handle payment cancellation
+  if (payment === "cancelled") {
+    // Fetch payment link to get the profile ID (used_by)
+    const { data: paymentLink } = await supabase
+      .from("payment_links")
+      .select("used_by")
+      .eq("token", token)
+      .single();
+
+    // If a profile was created (used_by exists), update it to SUSPENDED
+    if (paymentLink?.used_by) {
+      await adminSupabase
+        .from("profiles")
+        .update({
+          status: "SUSPENDED",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", paymentLink.used_by);
+    }
+
+    // Redirect to login with message
+    redirect("/login?message=payment_cancelled");
+  }
 
   // Fetch payment link with product details
   const { data: paymentLink, error: linkError } = await supabase

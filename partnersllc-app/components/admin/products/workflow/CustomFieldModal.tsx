@@ -4,8 +4,9 @@ import { useState } from "react";
 import { StepField, FieldType } from "@/types/products";
 
 interface CustomFieldModalProps {
+  stepId: string;
   field?: StepField;
-  onSave: (field: Omit<StepField, "id" | "created_at" | "updated_at">) => void;
+  onSave: (field: StepField) => void;
   onClose: () => void;
 }
 
@@ -23,6 +24,7 @@ const FIELD_TYPES: { value: FieldType; label: string }[] = [
 ];
 
 export function CustomFieldModal({
+  stepId,
   field,
   onSave,
   onClose,
@@ -30,7 +32,7 @@ export function CustomFieldModal({
   const [formData, setFormData] = useState<
     Omit<StepField, "id" | "created_at" | "updated_at">
   >({
-    step_id: field?.step_id || "",
+    step_id: stepId,
     field_key: field?.field_key || "",
     label: field?.label || "",
     description: field?.description || null,
@@ -50,6 +52,8 @@ export function CustomFieldModal({
 
   const [newOptionValue, setNewOptionValue] = useState("");
   const [newOptionLabel, setNewOptionLabel] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const generateFieldKey = (label: string): string => {
     return label
@@ -91,12 +95,13 @@ export function CustomFieldModal({
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     // Validation
     if (formData.label.length < 2 || formData.label.length > 100) {
-      alert("Label must be between 2 and 100 characters");
+      setError("Label must be between 2 and 100 characters");
       return;
     }
 
@@ -104,11 +109,47 @@ export function CustomFieldModal({
       ["select", "radio", "checkbox"].includes(formData.field_type) &&
       formData.options.length < 2
     ) {
-      alert("Select, Radio, and Checkbox fields require at least 2 options");
+      setError("Select, Radio, and Checkbox fields require at least 2 options");
       return;
     }
 
-    onSave(formData);
+    setLoading(true);
+
+    try {
+      const url = `/api/admin/steps/${stepId}/fields`;
+      const method = field ? "PUT" : "POST";
+      
+      // For creation, exclude position to let API calculate it automatically
+      // For update, include position to allow reordering
+      const { position: _, ...formDataWithoutPosition } = formData;
+      const body = field
+        ? {
+            id: field.id,
+            ...formData,
+          }
+        : formDataWithoutPosition;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save field");
+      }
+
+      const data = await response.json();
+      onSave(data.field);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const needsTextValidation = ["text", "textarea", "email", "phone"].includes(
@@ -137,6 +178,11 @@ export function CustomFieldModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             {/* Label */}
             <div>
@@ -419,9 +465,15 @@ export function CustomFieldModal({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-brand-accent/90 transition-colors font-medium"
+              disabled={loading}
+              className="px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-brand-accent/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {field ? "Update" : "Add"} Field
+              {loading
+                ? "Saving..."
+                : field
+                  ? "Update"
+                  : "Add"}{" "}
+              Field
             </button>
           </div>
         </form>

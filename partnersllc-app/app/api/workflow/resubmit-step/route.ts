@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 
 export async function PATCH(request: NextRequest) {
@@ -18,13 +18,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verify user owns this step instance
+    // Use explicit relationship name to avoid ambiguity
     const { data: stepInstance, error: stepInstanceError } = await supabase
       .from("step_instances")
-      .select("*, dossiers!inner(user_id)")
+      .select("*, dossiers!step_instances_dossier_id_fkey!inner(user_id)")
       .eq("id", step_instance_id)
       .single();
 
     if (stepInstanceError || !stepInstance) {
+      console.error(
+        "[RESUBMIT STEP] Step instance not found:",
+        step_instance_id,
+        stepInstanceError
+      );
       return NextResponse.json(
         { message: "Instance d'étape introuvable" },
         { status: 404 }
@@ -34,10 +40,7 @@ export async function PATCH(request: NextRequest) {
     // Type assertion for dossier relation
     const dossier = (stepInstance as any).dossiers;
     if (dossier.user_id !== user.id) {
-      return NextResponse.json(
-        { message: "Non autorisé" },
-        { status: 403 }
-      );
+      return NextResponse.json({ message: "Non autorisé" }, { status: 403 });
     }
 
     // Verify step is REJECTED
@@ -78,7 +81,10 @@ export async function PATCH(request: NextRequest) {
         .eq("step_field_id", stepFieldId)
         .single();
 
-      if (!currentFieldValue || currentFieldValue.validation_status !== "REJECTED") {
+      if (
+        !currentFieldValue ||
+        currentFieldValue.validation_status !== "REJECTED"
+      ) {
         console.warn(`Field ${fieldKey} is not rejected, skipping`);
         continue;
       }
@@ -117,7 +123,9 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Re-submit step instance for admin review
-    const { error: instanceUpdateError } = await supabase
+    // Use admin client to bypass RLS
+    const adminClient = createAdminClient();
+    const { data: updatedInstance, error: instanceUpdateError } = await adminClient
       .from("step_instances")
       .update({
         validation_status: "SUBMITTED",
@@ -125,12 +133,19 @@ export async function PATCH(request: NextRequest) {
         validated_by: null,
         validated_at: null,
       })
-      .eq("id", step_instance_id);
+      .eq("id", step_instance_id)
+      .select("id, validation_status")
+      .single();
 
     if (instanceUpdateError) {
-      console.error("Error updating step instance:", instanceUpdateError);
+      console.error("[RESUBMIT STEP] Error updating step instance:", instanceUpdateError);
       throw new Error("Erreur lors de la mise à jour de l'instance");
     }
+
+    console.log("[RESUBMIT STEP] Step instance updated:", {
+      step_instance_id,
+      validation_status: updatedInstance?.validation_status,
+    });
 
     return NextResponse.json(
       {

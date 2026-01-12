@@ -73,7 +73,7 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
-          <SuspendedStatus />
+          <SuspendedStatus profile={profile} />
         </div>
       </div>
     );

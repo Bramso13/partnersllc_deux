@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/types/auth";
 import type { NavConfig } from "@/lib/navigation-config";
 import { SidebarHeader } from "./SidebarHeader";
@@ -17,6 +18,8 @@ interface SidebarProps {
 
 export function Sidebar({ role, navConfig, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -24,6 +27,20 @@ export function Sidebar({ role, navConfig, isOpen, onClose }: SidebarProps) {
       onClose();
     }
   }, [pathname, isOpen, onClose]);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <>
@@ -57,7 +74,17 @@ export function Sidebar({ role, navConfig, isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="mt-auto pt-4">
+        <div className="mt-auto pt-4 space-y-3">
+          {/* Logout button */}
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full py-2.5 px-4 bg-[#2D3033] hover:bg-[#3A3D42] text-[#F9F9F9] font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <i className="fa-solid fa-right-from-bracket"></i>
+            <span>{isLoggingOut ? "Déconnexion..." : "Déconnexion"}</span>
+          </button>
+
           <SidebarFooter role={role} />
         </div>
 

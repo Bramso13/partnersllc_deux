@@ -1,7 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdminAuth } from "@/lib/auth";
 import crypto from "crypto";
+
+// Helper function to get or create agent for user
+async function getOrCreateAgent(userId: string, userName: string, userEmail: string) {
+  const supabase = await createAdminClient();
+  
+  // Try to find existing agent by email
+  const { data: agent, error } = await supabase
+    .from("agents")
+    .select("id")
+    .eq("email", userEmail)
+    .single();
+
+  // If agent doesn't exist, create one
+  if (error || !agent) {
+    const { data: newAgent, error: createError } = await supabase
+      .from("agents")
+      .insert({
+        email: userEmail,
+        name: userName,
+        active: true,
+      })
+      .select("id")
+      .single();
+
+    if (createError) {
+      console.error("Error creating agent:", createError);
+      throw new Error("Impossible de créer l'agent");
+    }
+
+    return newAgent.id;
+  }
+
+  return agent.id;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +55,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
+    // Get or create agent for this user
+    const agentId = await getOrCreateAgent(
+      user.id,
+      user.full_name || "Admin",
+      user.email
+    );
+
     // Generate unique token
     const token = crypto.randomBytes(16).toString("hex");
 
@@ -38,7 +79,7 @@ export async function POST(request: NextRequest) {
         product_id,
         expires_at: expiresAt.toISOString(),
         status: "ACTIVE",
-        created_by: user.id,
+        created_by: agentId,
       })
       .select()
       .single();

@@ -22,11 +22,6 @@ export async function createRetryCheckoutSession(): Promise<string | null> {
           id,
           name,
           stripe_price_id
-        ),
-        profiles!inner (
-          id,
-          email,
-          full_name
         )
       `
       )
@@ -50,14 +45,6 @@ export async function createRetryCheckoutSession(): Promise<string | null> {
           stripe_price_id: string | null;
         });
 
-    const profile = Array.isArray(order.profiles)
-      ? order.profiles[0]
-      : (order.profiles as {
-          id: string;
-          email: string;
-          full_name: string | null;
-        });
-
     if (!product.stripe_price_id) {
       console.error("Product does not have a Stripe price ID");
       return null;
@@ -73,7 +60,7 @@ export async function createRetryCheckoutSession(): Promise<string | null> {
           quantity: 1,
         },
       ],
-      customer_email: profile.email,
+      customer_email: user.email || undefined,
       metadata: {
         order_id: order.id,
         user_id: user.id,

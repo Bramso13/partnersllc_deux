@@ -58,82 +58,88 @@ interface TimelineEvent {
 }
 
 function getTimelineEvents(dossier: DossierWithDetails): TimelineEvent[] {
-  if (dossier.step_instances && dossier.step_instances.length > 0) {
-    return dossier.step_instances
-      .sort((a, b) => {
-        const aDate = a.completed_at || a.started_at || "";
-        const bDate = b.completed_at || b.started_at || "";
-        return new Date(aDate).getTime() - new Date(bDate).getTime();
-      })
-      .map((si) => {
-        const isCompleted = si.completed_at !== null;
-        const isInProgress =
-          !isCompleted && si.started_at !== null && si.id === dossier.current_step_instance_id;
-
-        if (isCompleted) {
-          return {
-            id: si.id,
-            title: si.step?.label || "Étape complétée",
-            description: "Étape terminée avec succès.",
-            date: si.completed_at
-              ? new Date(si.completed_at).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })
-              : undefined,
-            icon: "fas fa-check",
-            iconBg: "bg-brand-success/20",
-            iconColor: "text-brand-success",
-          };
-        } else if (isInProgress) {
-          return {
-            id: si.id,
-            title: si.step?.label || "Étape en cours",
-            description: "Traitement en cours...",
-            icon: "fas fa-spinner fa-spin",
-            iconBg: "bg-brand-warning/20",
-            iconColor: "text-brand-warning",
-          };
-        } else {
-          return {
-            id: si.id,
-            title: si.step?.label || "Étape à venir",
-            description: "Cette étape sera traitée prochainement.",
-            icon: "fas fa-clock",
-            iconBg: "bg-brand-dark-surface",
-            iconColor: "text-brand-text-secondary",
-          };
-        }
-      });
+  // Retourner uniquement les événements réels basés sur les step_instances
+  if (!dossier.step_instances || dossier.step_instances.length === 0) {
+    return [];
   }
 
-  // Default timeline if no step instances
-  return [
-    {
-      id: "1",
-      title: "Vérification d'identité",
-      description: "Documents approuvés par notre équipe.",
-      date: "17 janvier 2024",
-      icon: "fas fa-check",
-      iconBg: "bg-brand-success/20",
-      iconColor: "text-brand-success",
-    },
-    {
-      id: "2",
-      title: "Dépôt au Delaware",
-      description: "Certificate of Formation en cours de traitement.",
-      icon: "fas fa-spinner fa-spin",
-      iconBg: "bg-brand-warning/20",
-      iconColor: "text-brand-warning",
-    },
-    {
-      id: "3",
-      title: "Obtention de l'EIN",
-      description: "À venir après l'enregistrement de la société.",
-      icon: "fas fa-clock",
-      iconBg: "bg-brand-dark-surface",
-      iconColor: "text-brand-text-secondary",
-    },
-  ];
+  return dossier.step_instances
+    .sort((a, b) => {
+      const aDate = a.completed_at || a.started_at || "";
+      const bDate = b.completed_at || b.started_at || "";
+      return new Date(aDate).getTime() - new Date(bDate).getTime();
+    })
+    .map((si) => {
+      const validationStatus = si.validation_status;
+      const isCompleted = si.completed_at !== null;
+      const isCurrentStep = si.id === dossier.current_step_instance_id;
+
+      // Déterminer l'état réel basé sur validation_status et completed_at
+      if (validationStatus === "APPROVED" || isCompleted) {
+        return {
+          id: si.id,
+          title: si.step?.label || "Étape complétée",
+          description: validationStatus === "REJECTED" 
+            ? si.rejection_reason || "Étape rejetée"
+            : "Étape terminée avec succès.",
+          date: si.completed_at
+            ? new Date(si.completed_at).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : undefined,
+          icon: validationStatus === "REJECTED" ? "fas fa-times" : "fas fa-check",
+          iconBg: validationStatus === "REJECTED" 
+            ? "bg-red-500/20" 
+            : "bg-brand-success/20",
+          iconColor: validationStatus === "REJECTED" 
+            ? "text-red-500" 
+            : "text-brand-success",
+        };
+      } else if (
+        validationStatus === "SUBMITTED" ||
+        validationStatus === "UNDER_REVIEW" ||
+        (isCurrentStep && si.started_at !== null)
+      ) {
+        return {
+          id: si.id,
+          title: si.step?.label || "Étape en cours",
+          description:
+            validationStatus === "UNDER_REVIEW"
+              ? "En cours de validation par notre équipe."
+              : validationStatus === "SUBMITTED"
+                ? "Soumis, en attente de validation."
+                : "Traitement en cours...",
+          date: si.started_at
+            ? new Date(si.started_at).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : undefined,
+          icon: "fas fa-spinner fa-spin",
+          iconBg: "bg-brand-warning/20",
+          iconColor: "text-brand-warning",
+        };
+      } else if (validationStatus === "DRAFT" || si.started_at !== null) {
+        return {
+          id: si.id,
+          title: si.step?.label || "Étape en brouillon",
+          description: "Étape en cours de préparation.",
+          icon: "fas fa-edit",
+          iconBg: "bg-brand-dark-surface",
+          iconColor: "text-brand-text-secondary",
+        };
+      } else {
+        return {
+          id: si.id,
+          title: si.step?.label || "Étape à venir",
+          description: "Cette étape sera traitée prochainement.",
+          icon: "fas fa-clock",
+          iconBg: "bg-brand-dark-surface",
+          iconColor: "text-brand-text-secondary",
+        };
+      }
+    });
 }

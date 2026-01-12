@@ -57,22 +57,24 @@ export function UploadDocumentModal({
 
       const { data: dossiersData, error } = await supabase
         .from("dossiers")
-        .select(`
+        .select(
+          `
           id,
           product_id,
           product:products(name)
-        `)
+        `
+        )
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
+
       // Transform the data to match our Dossier type
       const transformedDossiers = (dossiersData || []).map((d: any) => ({
         id: d.id,
         product_id: d.product_id,
-        product: Array.isArray(d.product) ? d.product[0] : d.product
+        product: Array.isArray(d.product) ? d.product[0] : d.product,
       }));
-      
+
       setDossiers(transformedDossiers as Dossier[]);
     } catch (err: any) {
       setError("Erreur lors du chargement des dossiers");
@@ -128,9 +130,7 @@ export function UploadDocumentModal({
     // Validate file size (10MB max)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      setError(
-        "Fichier trop volumineux. La taille maximale est de 10MB."
-      );
+      setError("Fichier trop volumineux. La taille maximale est de 10MB.");
       return;
     }
 
@@ -218,7 +218,9 @@ export function UploadDocumentModal({
       // Success - close modal and refresh
       onSuccess();
       // Show success message (could be enhanced with a toast library)
-      alert("Document téléversé avec succès. Vous serez notifié lors de sa validation.");
+      alert(
+        "Document téléversé avec succès. Vous serez notifié lors de sa validation."
+      );
     } catch (err: any) {
       setError(err.message || "Erreur lors du téléversement");
       setIsUploading(false);
@@ -271,14 +273,16 @@ export function UploadDocumentModal({
               value={selectedDocumentTypeId}
               onChange={(e) => setSelectedDocumentTypeId(e.target.value)}
               className="w-full bg-brand-dark-bg border border-brand-dark-border rounded-lg px-4 py-2 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
-              disabled={isUploading || !selectedDossierId || documentTypes.length === 0}
+              disabled={
+                isUploading || !selectedDossierId || documentTypes.length === 0
+              }
             >
               <option value="">
                 {!selectedDossierId
                   ? "Sélectionnez d'abord un dossier"
                   : documentTypes.length === 0
-                  ? "Aucun type disponible"
-                  : "Sélectionnez un type"}
+                    ? "Aucun type disponible"
+                    : "Sélectionnez un type"}
               </option>
               {documentTypes.map((type) => (
                 <option key={type.id} value={type.id}>

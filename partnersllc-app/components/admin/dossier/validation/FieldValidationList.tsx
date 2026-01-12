@@ -1,7 +1,7 @@
 "use client";
 
-import { StepFieldValue } from "./StepValidationSection";
 import { FieldValidationItem } from "./FieldValidationItem";
+import { StepFieldValue } from "./StepValidationSection";
 
 interface FieldValidationListProps {
   dossierId: string;

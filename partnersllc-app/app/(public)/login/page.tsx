@@ -7,7 +7,12 @@ export const metadata: Metadata = {
   description: "Connectez-vous à votre compte Partners LLC",
 };
 
-export default function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{ message?: string }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { message } = await searchParams;
   return (
     <div className="relative w-full h-screen overflow-hidden bg-background">
       {/* Gradient Background */}
@@ -67,6 +72,20 @@ export default function LoginPage() {
               Connectez-vous à votre espace PARTNERS
             </p>
           </div>
+
+          {message === "payment_cancelled" && (
+            <div className="bg-warning/10 border border-warning/20 text-warning px-4 py-3 rounded mb-4">
+              <div className="flex items-start gap-3">
+                <i className="fa-solid fa-exclamation-triangle mt-0.5"></i>
+                <div>
+                  <p className="font-semibold mb-1">Paiement annulé</p>
+                  <p className="text-sm">
+                    Veuillez vous connecter pour réessayer de payer et finaliser votre inscription.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <LoginForm />
 

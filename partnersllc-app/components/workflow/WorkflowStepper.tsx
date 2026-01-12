@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { ProductStep, Step } from "@/lib/workflow";
 import { StepField } from "@/types/qualification";
 import { DynamicFormField } from "@/components/qualification/DynamicFormField";
@@ -11,7 +11,10 @@ interface WorkflowStepperProps {
   productSteps: ProductStep[];
   dossierId: string;
   productName: string;
-  onStepComplete: (stepId: string, fieldValues: Record<string, any>) => Promise<void>;
+  onStepComplete: (
+    stepId: string,
+    fieldValues: Record<string, any>
+  ) => Promise<void>;
   initialStepId?: string;
 }
 
@@ -23,7 +26,12 @@ interface StepFieldWithValidation extends StepField {
 
 interface StepInstance {
   id: string;
-  validation_status: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+  validation_status:
+    | "DRAFT"
+    | "SUBMITTED"
+    | "UNDER_REVIEW"
+    | "APPROVED"
+    | "REJECTED";
   rejection_reason?: string | null;
 }
 
@@ -45,9 +53,14 @@ export function WorkflowStepper({
     return 0;
   };
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(getInitialStepIndex());
-  const [currentStepFields, setCurrentStepFields] = useState<StepFieldWithValidation[]>([]);
-  const [currentStepInstance, setCurrentStepInstance] = useState<StepInstance | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(
+    getInitialStepIndex()
+  );
+  const [currentStepFields, setCurrentStepFields] = useState<
+    StepFieldWithValidation[]
+  >([]);
+  const [currentStepInstance, setCurrentStepInstance] =
+    useState<StepInstance | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -55,32 +68,50 @@ export function WorkflowStepper({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState<any[]>([]);
+  const lastLoadedStepIdRef = useRef<string | null>(null);
 
   const currentStep = productSteps[currentStepIndex];
+  console.log(
+    "[WORKFLOW STEPPER] Current step document types:",
+    currentStep.document_types
+  );
   const totalSteps = productSteps.length;
 
   // Load step instance and fields for current step
   useEffect(() => {
-    const loadStepData = async () => {
-      if (!currentStep) return;
+    const step = productSteps[currentStepIndex];
 
+    console.log("[WORKFLOW STEPPER] Current step:", step);
+    if (!step?.step_id) return;
+
+    const stepId = step.step_id;
+
+    // Skip if we're already loading/loaded this step
+    if (lastLoadedStepIdRef.current === stepId) return;
+
+    // Mark this step as being loaded immediately to prevent duplicate calls
+    lastLoadedStepIdRef.current = stepId;
+
+    const loadStepData = async () => {
       setIsLoading(true);
       try {
-        // First, get step instance for this step if it exists
+        // First, get step instance for this step (will be created in DRAFT if it doesn't exist)
         const instanceResponse = await fetch(
-          `/api/workflow/step-instance?dossier_id=${dossierId}&step_id=${currentStep.step_id}`
+          `/api/workflow/step-instance?dossier_id=${dossierId}&step_id=${stepId}`
         );
         let stepInstance: StepInstance | null = null;
         if (instanceResponse.ok) {
           stepInstance = await instanceResponse.json();
-          setCurrentStepInstance(stepInstance);
+          if (stepInstance) {
+            setCurrentStepInstance(stepInstance);
+          }
         }
 
         // Load fields with values if step instance exists
         const stepInstanceId = stepInstance?.id;
         const fieldsUrl = stepInstanceId
-          ? `/api/workflow/step-fields?step_id=${currentStep.step_id}&step_instance_id=${stepInstanceId}`
-          : `/api/workflow/step-fields?step_id=${currentStep.step_id}`;
+          ? `/api/workflow/step-fields?step_id=${stepId}&step_instance_id=${stepInstanceId}`
+          : `/api/workflow/step-fields?step_id=${stepId}`;
 
         const fieldsResponse = await fetch(fieldsUrl);
         if (!fieldsResponse.ok) throw new Error("Failed to load step fields");
@@ -94,13 +125,19 @@ export function WorkflowStepper({
 
         console.log("[WorkflowStepper] Loading documents from:", docsUrl);
         const docsResponse = await fetch(docsUrl);
-        console.log("[WorkflowStepper] Documents response status:", docsResponse.status);
+        console.log(
+          "[WorkflowStepper] Documents response status:",
+          docsResponse.status
+        );
         if (docsResponse.ok) {
           const docs = await docsResponse.json();
           console.log("[WorkflowStepper] Documents loaded:", docs);
           setUploadedDocuments(docs);
         } else {
-          console.error("[WorkflowStepper] Failed to load documents:", await docsResponse.text());
+          console.error(
+            "[WorkflowStepper] Failed to load documents:",
+            await docsResponse.text()
+          );
         }
 
         // Initialize form data with existing values or defaults
@@ -108,7 +145,10 @@ export function WorkflowStepper({
         fields.forEach((field: StepFieldWithValidation) => {
           if (field.currentValue !== undefined && field.currentValue !== null) {
             // Parse JSONB arrays if needed
-            if (typeof field.currentValue === "string" && field.field_type === "checkbox") {
+            if (
+              typeof field.currentValue === "string" &&
+              field.field_type === "checkbox"
+            ) {
               try {
                 initialData[field.field_key] = JSON.parse(field.currentValue);
               } catch {
@@ -119,7 +159,10 @@ export function WorkflowStepper({
             }
           } else if (field.default_value) {
             initialData[field.field_key] = field.default_value;
-          } else if (field.field_type === "checkbox" && Array.isArray(field.options)) {
+          } else if (
+            field.field_type === "checkbox" &&
+            Array.isArray(field.options)
+          ) {
             initialData[field.field_key] = [];
           }
         });
@@ -127,6 +170,8 @@ export function WorkflowStepper({
         setErrors({});
         setTouched({});
       } catch (error) {
+        // Reset ref on error so we can retry
+        lastLoadedStepIdRef.current = null;
         console.error("Error loading step data:", error);
       } finally {
         setIsLoading(false);
@@ -134,7 +179,7 @@ export function WorkflowStepper({
     };
 
     loadStepData();
-  }, [currentStep?.step_id, dossierId]);
+  }, [currentStepIndex, dossierId]);
 
   const canProceedToNext = () => {
     return currentStepInstance?.validation_status === "APPROVED";
@@ -215,7 +260,7 @@ export function WorkflowStepper({
 
     // If this is a resubmit (REJECTED status), only validate rejected fields
     const isResubmit = currentStepInstance?.validation_status === "REJECTED";
-    
+
     if (isResubmit) {
       // Only validate rejected fields that are being corrected
       const rejectedFields = currentStepFields.filter(
@@ -226,7 +271,10 @@ export function WorkflowStepper({
         rejectedFieldValues[field.field_key] = formData[field.field_key];
       });
 
-      const validationErrors = validateForm(rejectedFieldValues, rejectedFields);
+      const validationErrors = validateForm(
+        rejectedFieldValues,
+        rejectedFields
+      );
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
         setShowValidationErrors(true);
@@ -259,14 +307,20 @@ export function WorkflowStepper({
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Erreur lors de la resoumission");
+          throw new Error(
+            errorData.message || "Erreur lors de la resoumission"
+          );
         }
 
         // Reload step data to get updated validation status
         window.location.reload();
       } catch (error) {
         console.error("Error resubmitting step:", error);
-        alert(error instanceof Error ? error.message : "Erreur lors de la resoumission");
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de la resoumission"
+        );
         setIsSubmitting(false);
       }
     } else {
@@ -287,12 +341,16 @@ export function WorkflowStepper({
       setShowValidationErrors(false);
       try {
         await onStepComplete(currentStep.step_id, formData);
-        
+
         // Reload step data to get updated validation status
         window.location.reload();
       } catch (error) {
         console.error("Error submitting step:", error);
-        alert(error instanceof Error ? error.message : "Erreur lors de la soumission");
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de la soumission"
+        );
         setIsSubmitting(false);
       }
     }
@@ -312,8 +370,10 @@ export function WorkflowStepper({
 
   const formIsValid = isFormValid(formData, currentStepFields);
   const stepMessage = getStepMessage();
-  const canEdit = !currentStepInstance || currentStepInstance.validation_status === "DRAFT" || 
-                  currentStepInstance.validation_status === "REJECTED";
+  const canEdit =
+    !currentStepInstance ||
+    currentStepInstance.validation_status === "DRAFT" ||
+    currentStepInstance.validation_status === "REJECTED";
 
   if (isLoading) {
     return (
@@ -340,7 +400,7 @@ export function WorkflowStepper({
             {currentStep.step.description}
           </p>
         )}
-        
+
         {/* Progress Bar */}
         <div className="w-full bg-brand-dark-surface rounded-full h-2">
           <div
@@ -365,8 +425,8 @@ export function WorkflowStepper({
                   isApproved
                     ? "text-brand-success"
                     : isCurrent
-                    ? "text-brand-accent"
-                    : "text-brand-text-secondary"
+                      ? "text-brand-accent"
+                      : "text-brand-text-secondary"
                 }`}
               >
                 <div
@@ -374,8 +434,8 @@ export function WorkflowStepper({
                     isApproved
                       ? "bg-brand-success border-brand-success text-white"
                       : isCurrent
-                      ? "bg-brand-accent border-brand-accent text-brand-dark-bg"
-                      : "bg-transparent border-brand-dark-border"
+                        ? "bg-brand-accent border-brand-accent text-brand-dark-bg"
+                        : "bg-transparent border-brand-dark-border"
                   }`}
                 >
                   {isApproved ? (
@@ -389,9 +449,7 @@ export function WorkflowStepper({
                 {index < totalSteps - 1 && (
                   <div
                     className={`w-12 h-0.5 mx-1 ${
-                      isApproved
-                        ? "bg-brand-success"
-                        : "bg-brand-dark-border"
+                      isApproved ? "bg-brand-success" : "bg-brand-dark-border"
                     }`}
                   ></div>
                 )}
@@ -408,8 +466,8 @@ export function WorkflowStepper({
             stepMessage.type === "error"
               ? "bg-brand-danger/10 border border-brand-danger"
               : stepMessage.type === "success"
-              ? "bg-brand-success/10 border border-brand-success"
-              : "bg-brand-warning/10 border border-brand-warning"
+                ? "bg-brand-success/10 border border-brand-success"
+                : "bg-brand-warning/10 border border-brand-warning"
           }`}
         >
           <div className="flex items-center gap-2">
@@ -438,17 +496,28 @@ export function WorkflowStepper({
 
                 if (isFirstName) {
                   const lastNameField = currentStepFields.find(
-                    (f) => f.field_key === "last_name" && f.position === field.position + 1
+                    (f) =>
+                      f.field_key === "last_name" &&
+                      f.position === field.position + 1
                   );
 
                   if (lastNameField) {
                     return (
-                      <div key={`pair-${field.id}`} className="grid md:grid-cols-2 gap-6">
+                      <div
+                        key={`pair-${field.id}`}
+                        className="grid md:grid-cols-2 gap-6"
+                      >
                         <DynamicFormField
                           field={field}
                           value={formData[field.field_key]}
-                          error={touched[field.field_key] ? errors[field.field_key] : undefined}
-                          onChange={(value) => handleFieldChange(field.field_key, value)}
+                          error={
+                            touched[field.field_key]
+                              ? errors[field.field_key]
+                              : undefined
+                          }
+                          onChange={(value) =>
+                            handleFieldChange(field.field_key, value)
+                          }
                           onBlur={() => handleFieldBlur(field)}
                           validationStatus={field.validationStatus}
                           rejectionReason={field.rejectionReason || undefined}
@@ -457,11 +526,19 @@ export function WorkflowStepper({
                         <DynamicFormField
                           field={lastNameField}
                           value={formData[lastNameField.field_key]}
-                          error={touched[lastNameField.field_key] ? errors[lastNameField.field_key] : undefined}
-                          onChange={(value) => handleFieldChange(lastNameField.field_key, value)}
+                          error={
+                            touched[lastNameField.field_key]
+                              ? errors[lastNameField.field_key]
+                              : undefined
+                          }
+                          onChange={(value) =>
+                            handleFieldChange(lastNameField.field_key, value)
+                          }
                           onBlur={() => handleFieldBlur(lastNameField)}
                           validationStatus={lastNameField.validationStatus}
-                          rejectionReason={lastNameField.rejectionReason || undefined}
+                          rejectionReason={
+                            lastNameField.rejectionReason || undefined
+                          }
                           disabled={!canEditField(lastNameField)}
                         />
                       </div>
@@ -471,7 +548,9 @@ export function WorkflowStepper({
 
                 if (isLastName) {
                   const firstNameField = currentStepFields.find(
-                    (f) => f.field_key === "first_name" && f.position === field.position - 1
+                    (f) =>
+                      f.field_key === "first_name" &&
+                      f.position === field.position - 1
                   );
                   if (firstNameField) {
                     return null;
@@ -483,8 +562,14 @@ export function WorkflowStepper({
                     key={field.id}
                     field={field}
                     value={formData[field.field_key]}
-                    error={touched[field.field_key] ? errors[field.field_key] : undefined}
-                    onChange={(value) => handleFieldChange(field.field_key, value)}
+                    error={
+                      touched[field.field_key]
+                        ? errors[field.field_key]
+                        : undefined
+                    }
+                    onChange={(value) =>
+                      handleFieldChange(field.field_key, value)
+                    }
                     onBlur={() => handleFieldBlur(field)}
                     validationStatus={field.validationStatus}
                     rejectionReason={field.rejectionReason || undefined}
@@ -496,29 +581,31 @@ export function WorkflowStepper({
           )}
 
           {/* Required Documents Section */}
-          {currentStep.document_types && currentStep.document_types.length > 0 && (
-            <div className="border-t border-brand-dark-border pt-6">
-              <StepDocuments
-                dossierId={dossierId}
-                stepInstanceId={currentStepInstance?.id || ""}
-                requiredDocuments={currentStep.document_types}
-                uploadedDocuments={uploadedDocuments}
-                onDocumentUploaded={async () => {
-                  // Reload documents after upload
-                  const stepInstanceId = currentStepInstance?.id;
-                  const docsUrl = stepInstanceId
-                    ? `/api/workflow/dossier-documents?dossier_id=${dossierId}&step_instance_id=${stepInstanceId}`
-                    : `/api/workflow/dossier-documents?dossier_id=${dossierId}`;
+          {currentStep.document_types &&
+            currentStep.document_types.length > 0 &&
+            currentStepInstance && (
+              <div className="border-t border-brand-dark-border pt-6">
+                <StepDocuments
+                  dossierId={dossierId}
+                  stepInstanceId={currentStepInstance.id}
+                  requiredDocuments={currentStep.document_types}
+                  uploadedDocuments={uploadedDocuments}
+                  onDocumentUploaded={async () => {
+                    // Reload documents after upload
+                    const stepInstanceId = currentStepInstance?.id;
+                    const docsUrl = stepInstanceId
+                      ? `/api/workflow/dossier-documents?dossier_id=${dossierId}&step_instance_id=${stepInstanceId}`
+                      : `/api/workflow/dossier-documents?dossier_id=${dossierId}`;
 
-                  const docsResponse = await fetch(docsUrl);
-                  if (docsResponse.ok) {
-                    const docs = await docsResponse.json();
-                    setUploadedDocuments(docs);
-                  }
-                }}
-              />
-            </div>
-          )}
+                    const docsResponse = await fetch(docsUrl);
+                    if (docsResponse.ok) {
+                      const docs = await docsResponse.json();
+                      setUploadedDocuments(docs);
+                    }
+                  }}
+                />
+              </div>
+            )}
 
           {/* Validation Errors Section */}
           {showValidationErrors && Object.keys(errors).length > 0 && (
@@ -536,15 +623,22 @@ export function WorkflowStepper({
                   </p>
                   <ul className="space-y-2">
                     {Object.entries(errors).map(([fieldKey, errorMessage]) => {
-                      const field = currentStepFields.find((f) => f.field_key === fieldKey);
+                      const field = currentStepFields.find(
+                        (f) => f.field_key === fieldKey
+                      );
                       return (
-                        <li key={fieldKey} className="flex items-start gap-2 text-sm">
+                        <li
+                          key={fieldKey}
+                          className="flex items-start gap-2 text-sm"
+                        >
                           <span className="text-brand-danger mt-1">•</span>
                           <span className="text-brand-text-primary">
                             <span className="font-medium">
                               {field?.label || fieldKey} :{" "}
                             </span>
-                            <span className="text-brand-text-secondary">{errorMessage}</span>
+                            <span className="text-brand-text-secondary">
+                              {errorMessage}
+                            </span>
                           </span>
                         </li>
                       );
@@ -624,7 +718,8 @@ export function WorkflowStepper({
       ) : (
         <div className="text-center py-8">
           <p className="text-brand-text-secondary mb-4">
-            Cette étape est en cours de validation. Vous ne pouvez pas la modifier pour le moment.
+            Cette étape est en cours de validation. Vous ne pouvez pas la
+            modifier pour le moment.
           </p>
           <div className="pt-6 border-t border-brand-dark-border flex items-center justify-between">
             {currentStepIndex > 0 && (

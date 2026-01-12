@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -11,7 +11,19 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
     const dossierId = formData.get("dossier_id") as string;
     const documentTypeId = formData.get("document_type_id") as string;
-    const stepInstanceId = formData.get("step_instance_id") as string;
+    const stepInstanceIdRaw = formData.get("step_instance_id") as string | null;
+    // Convert empty string to null, keep valid strings
+    const stepInstanceId = stepInstanceIdRaw && stepInstanceIdRaw.trim() !== "" 
+      ? stepInstanceIdRaw 
+      : null;
+
+    console.log("[UPLOAD DOCUMENT] Props:", {
+      file,
+      dossierId,
+      documentTypeId,
+      stepInstanceId,
+      stepInstanceIdRaw,
+    });
 
     if (!file || !dossierId || !documentTypeId) {
       return NextResponse.json(
@@ -59,13 +71,29 @@ export async function POST(request: NextRequest) {
       data: { publicUrl },
     } = supabase.storage.from("dossier-documents").getPublicUrl(fileName);
 
-    // Check if document already exists for this type and dossier
-    const { data: existingDoc } = await supabase
+    // Check if document already exists for this type, dossier, and step_instance
+    let existingDocQuery = supabase
       .from("documents")
       .select("id")
       .eq("dossier_id", dossierId)
-      .eq("document_type_id", documentTypeId)
-      .maybeSingle();
+      .eq("document_type_id", documentTypeId);
+    
+    // Include step_instance_id in the check if provided
+    if (stepInstanceId) {
+      existingDocQuery = existingDocQuery.eq("step_instance_id", stepInstanceId);
+    } else {
+      // If no step_instance_id provided, check for documents with null step_instance_id
+      existingDocQuery = existingDocQuery.is("step_instance_id", null);
+    }
+    
+    const { data: existingDoc } = await existingDocQuery.maybeSingle();
+    
+    console.log("[UPLOAD DOCUMENT] Existing document check:", {
+      dossierId,
+      documentTypeId,
+      stepInstanceId,
+      existingDoc,
+    });
 
     let documentId: string;
 
@@ -108,23 +136,58 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Update document's current version
-      await supabase
+      // Verify document still exists before updating
+      const { data: docCheck } = await supabase
+        .from("documents")
+        .select("id")
+        .eq("id", documentId)
+        .single();
+
+      if (!docCheck) {
+        console.error("[UPLOAD DOCUMENT] Document not found for update:", documentId);
+        return NextResponse.json(
+          { error: "Document not found" },
+          { status: 404 }
+        );
+      }
+
+      // Update document's current version using admin client to bypass RLS
+      const adminClient = createAdminClient();
+      const { data: updateData, error: updateError } = await adminClient
         .from("documents")
         .update({
           current_version_id: newVersion.id,
           status: "PENDING",
         })
-        .eq("id", documentId);
+        .eq("id", documentId)
+        .select("id, current_version_id, status")
+        .single();
+
+      if (updateError) {
+        console.error("[UPLOAD DOCUMENT] Document update error:", updateError);
+        return NextResponse.json(
+          { error: "Failed to update document" },
+          { status: 500 }
+        );
+      }
+
+      console.log("[UPLOAD DOCUMENT] Document updated successfully:", {
+        documentId,
+        current_version_id: updateData?.current_version_id,
+        newVersionId: newVersion.id,
+        status: updateData?.status,
+        updateData,
+      });
     } else {
-      // Create new document
+      // Create new document first (without current_version_id, will be set after version creation)
       const { data: newDoc, error: docError } = await supabase
         .from("documents")
         .insert({
           dossier_id: dossierId,
           document_type_id: documentTypeId,
-          step_instance_id: stepInstanceId || null,
+          step_instance_id: stepInstanceId,
           status: "PENDING",
+          // current_version_id will be set after version creation
         })
         .select()
         .single();
@@ -139,8 +202,8 @@ export async function POST(request: NextRequest) {
 
       documentId = newDoc.id;
 
-      // Create first version
-      const { data: newVersion, error: versionError } = await supabase
+      // Create first version with document_id
+      const { data: firstVersion, error: versionError } = await supabase
         .from("document_versions")
         .insert({
           document_id: documentId,
@@ -157,17 +220,43 @@ export async function POST(request: NextRequest) {
 
       if (versionError) {
         console.error("Version creation error:", versionError);
+        // Clean up the document if version creation fails
+        await supabase
+          .from("documents")
+          .delete()
+          .eq("id", documentId);
         return NextResponse.json(
           { error: "Failed to create document version" },
           { status: 500 }
         );
       }
 
-      // Update document's current version
-      await supabase
+      // Update document with current_version_id using admin client to bypass RLS
+      const adminClient = createAdminClient();
+      const { data: updateData, error: updateError } = await adminClient
         .from("documents")
-        .update({ current_version_id: newVersion.id })
-        .eq("id", documentId);
+        .update({
+          current_version_id: firstVersion.id,
+        })
+        .eq("id", documentId)
+        .select("id, current_version_id, step_instance_id")
+        .single();
+
+      if (updateError) {
+        console.error("[UPLOAD DOCUMENT] Document update error:", updateError);
+        return NextResponse.json(
+          { error: "Failed to update document with version" },
+          { status: 500 }
+        );
+      }
+
+      console.log("[UPLOAD DOCUMENT] New document created and updated:", {
+        documentId,
+        current_version_id: updateData?.current_version_id,
+        firstVersionId: firstVersion.id,
+        step_instance_id: updateData?.step_instance_id,
+        updateData,
+      });
     }
 
     return NextResponse.json({

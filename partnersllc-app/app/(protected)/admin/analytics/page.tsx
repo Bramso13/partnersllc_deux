@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth";
+import { requireAdminAuth, requireAuth } from "@/lib/auth";
 import { getUserRole } from "@/lib/user-role";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
@@ -11,13 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminAnalyticsPage() {
-  const user = await requireAuth();
-  const role = await getUserRole(user.id);
-
-  // Redirect if not admin
-  if (role !== "ADMIN") {
-    redirect("/dashboard");
-  }
+  const user = await requireAdminAuth();
 
   return (
     <div className="min-h-screen bg-brand-dark-bg">
