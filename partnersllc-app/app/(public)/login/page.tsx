@@ -1,5 +1,6 @@
 import LoginForm from "@/components/auth/LoginForm";
 import { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -49,17 +50,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {/* Logo Section */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-[62px] h-[59px] bg-background rounded-[20px] flex items-center justify-center">
-                <i className="fa-solid fa-shield-halved text-accent text-2xl"></i>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground tracking-wide">
-                  PARTNERS
-                </h1>
-                <p className="text-xs text-text-secondary">
-                  LLC Formation Platform
-                </p>
-              </div>
+              <Image
+                src="/logo_partnersllc_blanc.png"
+                alt="PARTNERS LLC Logo"
+                width={200}
+                height={200}
+                className="object-contain"
+              />
             </div>
           </div>
 
@@ -80,7 +77,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <div>
                   <p className="font-semibold mb-1">Paiement annulé</p>
                   <p className="text-sm">
-                    Veuillez vous connecter pour réessayer de payer et finaliser votre inscription.
+                    Veuillez vous connecter pour réessayer de payer et finaliser
+                    votre inscription.
                   </p>
                 </div>
               </div>
@@ -90,7 +88,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <LoginForm />
 
           {/* Divider */}
-          <div className="relative my-8">
+          {/* <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border"></div>
             </div>
@@ -102,7 +100,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           {/* Social Login */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          {/* <div className="grid grid-cols-3 gap-4 mb-8">
             <button className="social-btn bg-surface border border-border rounded-md py-3 flex items-center justify-center gap-2 hover:bg-border transition-all">
               <svg
                 width="24"
@@ -161,10 +159,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 />
               </svg>
             </button>
-          </div>
+          </div> */}
 
           {/* Register Link */}
-          <div className="text-center">
+          {/* <div className="text-center">
             <p className="text-sm text-text-secondary">
               Vous n&apos;avez pas de compte ?{" "}
               <Link
@@ -174,7 +172,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 S&apos;inscrire
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -134,8 +134,8 @@ export default function LoginForm() {
         )}
       </div>
 
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end pt-2">
+        {/* <div className="flex items-center gap-3">
           <input
             {...register("remember")}
             type="checkbox"
@@ -148,10 +148,10 @@ export default function LoginForm() {
           >
             Se souvenir de moi
           </label>
-        </div>
+        </div> */}
         <Link
           href="/forgot-password"
-          className="text-sm text-accent hover:underline font-medium"
+          className="text-sm text-accent hover:underline font-medium self-end"
         >
           Mot de passe oublié ?
         </Link>
