@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { UserRole } from "@/types/auth";
 
 interface SidebarHeaderProps {
@@ -9,14 +10,15 @@ export function SidebarHeader({ role }: SidebarHeaderProps) {
   if (role === "ADMIN") {
     return (
       <div className="p-4 mb-8">
-        <Link href="/admin" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#2D3033] rounded-lg flex items-center justify-center">
-            <i className="fa-solid fa-shield-halved text-[#00F0FF] text-lg"></i>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-[#F9F9F9] tracking-wide">
-              PARTNERS
-            </div>
+        <Link href="/admin/analytics" className="flex items-center gap-3">
+          <div className="flex-row items-center gap-3">
+            <Image
+              src="/logo_partnersllc_blanc.png"
+              alt="PARTNERS LLC Logo"
+              width={200}
+              height={200}
+              className="object-contain"
+            />
             <div className="text-xs text-gray-500 mt-1 ml-0">Back-Office</div>
           </div>
         </Link>
@@ -28,13 +30,14 @@ export function SidebarHeader({ role }: SidebarHeaderProps) {
     return (
       <div className="p-4 mb-8">
         <Link href="/agent" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#2D3033] rounded-lg flex items-center justify-center">
-            <i className="fa-solid fa-user-tie text-[#50B88A] text-lg"></i>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-[#F9F9F9] tracking-wide">
-              PARTNERS
-            </div>
+          <div className="flex-row items-center gap-3">
+            <Image
+              src="/logo_partnersllc_blanc.png"
+              alt="PARTNERS LLC Logo"
+              width={200}
+              height={200}
+              className="object-contain"
+            />
             <div className="text-xs text-gray-500 mt-1 ml-0">Espace Agent</div>
           </div>
         </Link>
@@ -46,9 +49,14 @@ export function SidebarHeader({ role }: SidebarHeaderProps) {
   return (
     <div className="p-4 mb-8">
       <Link href="/dashboard">
-        <div className="h-9 w-auto">
-          {/* Placeholder for logo - replace with actual logo image */}
-          <div className="text-xl font-bold text-[#F9F9F9]">PARTNERS LLC</div>
+        <div className="flex-row items-center gap-3">
+          <Image
+            src="/logo_partnersllc_blanc.png"
+            alt="PARTNERS LLC Logo"
+            width={200}
+            height={200}
+            className="object-contain"
+          />
         </div>
       </Link>
     </div>

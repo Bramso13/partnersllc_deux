@@ -1,38 +1,33 @@
 @import "tailwindcss";
 
-:root {
+/* Tailwind CSS v4 uses @theme for custom design tokens */
+@theme {
   /* Design System Colors */
-  --color-main-bg: #191A1D;
-  --color-surface: #2D3033;
+  --color-background: #191a1d;
+  --color-foreground: #f9f9f9;
+  --color-surface: #2d3033;
   --color-border: #363636;
-  --color-text-primary: #F9F9F9;
-  --color-text-secondary: #B7B7B7;
-  --color-accent: #00F0FF;
-  --color-success: #4ADE80;
-  --color-warning: #FACC15;
-  --color-danger: #F95757;
-}
+  --color-text-primary: #f9f9f9;
+  --color-text-secondary: #b7b7b7;
+  --color-accent: #00f0ff;
+  --color-success: #4ade80;
+  --color-warning: #facc15;
+  --color-danger: #f95757;
 
-@theme inline {
-  /* Background Colors */
-  --color-background: var(--color-main-bg);
-  --color-surface: var(--color-surface);
-  
-  /* Text Colors */
-  --color-foreground: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  
-  /* Border Colors */
-  --color-border: var(--color-border);
-  
-  /* Accent Colors */
-  --color-accent: var(--color-accent);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-danger: var(--color-danger);
-  
+  /* Brand Colors - These become available as brand-* utilities */
+  --color-brand-dark-bg: #191a1d;
+  --color-brand-dark-surface: #2d3033;
+  --color-brand-dark-border: #363636;
+  --color-brand-text-primary: #f9f9f9;
+  --color-brand-text-secondary: #b7b7b7;
+  --color-brand-accent: #00f0ff;
+  --color-brand-success: #4ade80;
+  --color-brand-warning: #facc15;
+  --color-brand-danger: #f95757;
+  --color-client-green: #50b88a;
+
   /* Typography */
-  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-sans: var(--font-inter, "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
 }
 
 body {

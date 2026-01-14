@@ -83,6 +83,11 @@ export async function middleware(request: NextRequest) {
         url.pathname = "/agent";
         return NextResponse.redirect(url);
       }
+      if (role === "ADMIN") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin/analytics";
+        return NextResponse.redirect(url);
+      }
     }
 
     // Store role and status in headers for use in page components
@@ -93,10 +98,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect authenticated users away from /login and /register
-  if (
-    (pathname === "/login" || pathname === "/register") &&
-    user
-  ) {
+  if ((pathname === "/login" || pathname === "/register") && user) {
     // Fetch role to redirect to appropriate workspace
     const { data: profile } = await supabase
       .from("profiles")

@@ -18,6 +18,9 @@ export function DocumentValidationItem({
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const handleApprove = async () => {
     try {
@@ -123,10 +126,46 @@ export function DocumentValidationItem({
     return `${kb.toFixed(2)} KB`;
   };
 
-  const handleDownload = () => {
-    if (document.current_version?.file_url) {
-      window.open(document.current_version.file_url, "_blank");
+  const handleView = async () => {
+    if (!document.current_version) {
+      toast.error("Aucune version disponible pour ce document");
+      return;
     }
+
+    try {
+      setPreviewLoading(true);
+      setShowPreview(true);
+
+      // Construire l'URL de l'API pour récupérer le document
+      const viewUrl = `/api/admin/dossiers/${dossierId}/documents/${document.id}/view`;
+      
+      // Créer un blob URL depuis la réponse de l'API
+      const response = await fetch(viewUrl);
+      
+      if (!response.ok) {
+        throw new Error("Erreur lors du chargement du document");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
+    } catch (err) {
+      console.error("Error viewing document:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Erreur lors du chargement du document"
+      );
+      setShowPreview(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    setShowPreview(false);
   };
 
   return (
@@ -177,11 +216,11 @@ export function DocumentValidationItem({
         <div className="flex items-center gap-2 flex-shrink-0">
           {document.current_version && (
             <button
-              onClick={handleDownload}
+              onClick={handleView}
               className="px-3 py-1.5 rounded bg-brand-accent/20 hover:bg-brand-accent/30 text-brand-accent text-sm font-medium transition-colors"
-              title="Télécharger"
+              title="Visionner"
             >
-              <i className="fa-solid fa-download"></i>
+              <i className="fa-solid fa-eye"></i>
             </button>
           )}
 
@@ -264,6 +303,75 @@ export function DocumentValidationItem({
                   "Confirmer le rejet"
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-brand-dark-surface rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-brand-dark-border">
+              <div>
+                <h2 className="text-xl font-bold text-brand-text-primary">
+                  {document.current_version?.file_name || "Document"}
+                </h2>
+                <p className="text-sm text-brand-text-secondary mt-1">
+                  {document.document_type_label}
+                </p>
+              </div>
+              <button
+                onClick={handleClosePreview}
+                className="text-brand-text-secondary hover:text-brand-text-primary transition-colors p-2"
+                aria-label="Fermer"
+              >
+                <i className="fa-solid fa-times text-xl"></i>
+              </button>
+            </div>
+
+            {/* Preview Content */}
+            <div className="flex-1 overflow-auto p-6">
+              {previewLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <i className="fa-solid fa-spinner fa-spin text-4xl text-brand-text-secondary mb-4"></i>
+                    <p className="text-brand-text-secondary">Chargement...</p>
+                  </div>
+                </div>
+              ) : previewUrl ? (
+                <div className="flex items-center justify-center h-full">
+                  {document.current_version?.mime_type?.startsWith("image/") ? (
+                    <img
+                      src={previewUrl}
+                      alt={document.current_version?.file_name || "Document"}
+                      className="max-w-full max-h-full object-contain rounded-lg"
+                    />
+                  ) : document.current_version?.mime_type === "application/pdf" ? (
+                    <iframe
+                      src={previewUrl}
+                      className="w-full h-full min-h-[600px] rounded-lg border border-brand-dark-border"
+                      title={document.current_version?.file_name || "Document PDF"}
+                    />
+                  ) : (
+                    <div className="text-center">
+                      <i className="fa-solid fa-file text-6xl text-brand-text-secondary mb-4"></i>
+                      <p className="text-brand-text-primary mb-4">
+                        Aperçu non disponible pour ce type de fichier
+                      </p>
+                      <a
+                        href={previewUrl}
+                        download={document.current_version?.file_name}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-brand-accent text-brand-dark-bg rounded-lg hover:opacity-90 transition-opacity"
+                      >
+                        <i className="fa-solid fa-download"></i>
+                        <span>Télécharger</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

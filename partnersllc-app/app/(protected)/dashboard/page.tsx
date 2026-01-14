@@ -137,7 +137,7 @@ async function DashboardContent({ user }: { user: { id: string } }) {
     // Calculate estimated completion (mock for now - should come from business logic)
     const estimatedCompletion = mainDossier.completed_at
       ? null
-      : new Date(new Date().getTime() + 8 * 24 * 60 * 60 * 1000).toISOString();
+      : new Date(new Date(mainDossier.created_at).getTime() + 2 * 24 * 60 * 60 * 1000).toISOString();
 
     // Get advisor information
     const advisor = await getDossierAdvisor(mainDossier.id);

@@ -11,7 +11,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Partners LLC - Gestion de Dossiers",
-  description: "Plateforme de gestion de dossiers et paiements pour Partners LLC",
+  description:
+    "Plateforme de gestion de dossiers et paiements pour Partners LLC",
 };
 
 export default function RootLayout({
@@ -21,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased bg-black`}>
         {children}
       </body>
     </html>

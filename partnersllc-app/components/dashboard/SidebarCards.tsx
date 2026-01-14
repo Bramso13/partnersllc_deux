@@ -61,11 +61,11 @@ export function SidebarCards({
                 month: "long",
               })}
             </p>
-            <p className="text-xs text-brand-text-secondary mt-1">
+            {/* <p className="text-xs text-brand-text-secondary mt-1">
               {daysUntilCompletion !== null && daysUntilCompletion > 0
                 ? `Dans ${daysUntilCompletion} jour${daysUntilCompletion > 1 ? "s" : ""} ouvrable${daysUntilCompletion > 1 ? "s" : ""}`
                 : "Bientôt"}
-            </p>
+            </p> */}
           </>
         ) : (
           <>

@@ -32,7 +32,7 @@ export function SidebarProvider({
       <main
         className="
           flex-1 flex flex-col overflow-hidden
-          bg-[#2D3033] rounded-l-3xl
+          bg-[#2D3033]
           md:ml-72
           min-h-screen
         "
